@@ -52,7 +52,7 @@ namespace CoundFlareTools
             //     }
             //};
             //var order = cloudflareLogReport.CloudflareLogReportItems.Where(a => a.Ban).OrderByDescending(a => a.Count).ToArray();
-            //dataGridViewReport.DataSource = order;
+            //dataGridView1.DataSource = order;
 
         }
         private void Notification_Message(object sender, MessageEventArgs e)
@@ -111,9 +111,11 @@ namespace CoundFlareTools
                         this.Invoke(new Action(() =>
                         {
                             button1.Enabled = true;
-                            var order = cloudflareLogReport?.CloudflareLogReportItems?.Where(a => a.Ban).OrderByDescending(a => a.Count).ToArray();
-                            dataGridViewReport.DataSource = order;
-                            dataGridViewReport.Refresh();
+                            var order = cloudflareLogReport?.CloudflareLogReportItems?.Where(a => a.Ban).OrderByDescending(a => a.Count ).ToArray();
+                            dataGridView1.DataSource = order;
+                            dataGridView1.Columns[1].Width = 175;                  
+                            dataGridView1.Columns[2].Width = 500;
+                            dataGridView1.Refresh();
                         }));
                     }
                     else
@@ -197,20 +199,20 @@ namespace CoundFlareTools
             {
                 isBan = true;
             }
-            CloudflareLogReportItem[] items = dataGridViewReport.DataSource as CloudflareLogReportItem[];
+            CloudflareLogReportItem[] items = dataGridView1.DataSource as CloudflareLogReportItem[];
             foreach (CloudflareLogReportItem item in items)
             {
                 item.Ban = isBan;
             }
 
-            dataGridViewReport.DataSource = items;
-            dataGridViewReport.Refresh();
+            dataGridView1.DataSource = items;
+            dataGridView1.Refresh();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             List<string> ips = new List<string>();
-            CloudflareLogReportItem[] items = dataGridViewReport.DataSource as CloudflareLogReportItem[];
+            CloudflareLogReportItem[] items = dataGridView1.DataSource as CloudflareLogReportItem[];
             if (items != null)
             {
                 foreach(CloudflareLogReportItem item in items)

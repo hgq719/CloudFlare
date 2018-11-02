@@ -2,22 +2,22 @@
   {
     "Id": 1,
     "URL": "livechathandler3.ashx",
-    "Interval": 2,
-    "LimitTimes": 30,
+    "Interval": 1,
+    "LimitTimes": 1,
     "Remark": ""
   },
   {
     "Id": 2,
     "URL": "chatWindow.aspx",
     "Interval": 1,
-    "LimitTimes": 10,
+    "LimitTimes": 1,
     "Remark": ""
   },
   {
     "Id": 3,
     "URL": "visitor.ashx",
     "Interval": 1,
-    "LimitTimes": 5,
+    "LimitTimes": 1,
     "Remark": ""
   }
 ]

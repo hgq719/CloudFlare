@@ -127,7 +127,7 @@ namespace CoundFlareTools.CoundFlare
 
                 var result = (from item in itemsManyGroup
                               from config in requestLimitConfigs
-                              where item.ClientRequestURI == config.Url
+                              where item.ClientRequestURI.ToLower().Contains( config.Url.ToLower() )
                                     && ( ( item.Count / ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes / config.Interval) )
                               select item).OrderByDescending(a=>a.Count).ToList();
 
@@ -218,7 +218,7 @@ namespace CoundFlareTools.CoundFlare
 
                         stopwatch.Restart();
 
-                        var result = cloudflareLogs.GroupBy(a => new { a.ClientRequestHost, a.ClientIP });
+                        var result = cloudflareLogs.GroupBy(a => new { a.ClientRequestHost, a.ClientIP, a.ClientRequestURI });
 
                         List<CloudflareLogReportItem> CloudflareLogReportItemList = new List<CloudflareLogReportItem>();
                         foreach (var group in result)
@@ -228,7 +228,8 @@ namespace CoundFlareTools.CoundFlare
                                 {
                                     ClientRequestHost = group.Key.ClientRequestHost,
                                     ClientIP = group.Key.ClientIP,
-                                    ClientRequestURI = c.Url,
+                                    //ClientRequestURI = c.Url,
+                                    ClientRequestURI = group.Key.ClientRequestURI,
                                     Count = group.Count(a => a.ClientRequestURI.ToLower().Contains(c.Url.ToLower()))
                                 });
                             });

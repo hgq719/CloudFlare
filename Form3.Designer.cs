@@ -32,7 +32,6 @@
             this.richTextBoxMessage = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.dataGridViewReport = new System.Windows.Forms.DataGridView();
             this.label2 = new System.Windows.Forms.Label();
             this.dateTimePickerStart = new System.Windows.Forms.DateTimePicker();
             this.label3 = new System.Windows.Forms.Label();
@@ -42,7 +41,8 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.buttonUnban = new System.Windows.Forms.Button();
             this.checkBoxAutoBan = new System.Windows.Forms.CheckBox();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewReport)).BeginInit();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -59,7 +59,7 @@
             // 
             this.richTextBoxMessage.Location = new System.Drawing.Point(12, 401);
             this.richTextBoxMessage.Name = "richTextBoxMessage";
-            this.richTextBoxMessage.Size = new System.Drawing.Size(613, 190);
+            this.richTextBoxMessage.Size = new System.Drawing.Size(1164, 190);
             this.richTextBoxMessage.TabIndex = 15;
             this.richTextBoxMessage.Text = "";
             // 
@@ -75,15 +75,6 @@
             // backgroundWorker1
             // 
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            // 
-            // dataGridViewReport
-            // 
-            this.dataGridViewReport.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewReport.Location = new System.Drawing.Point(12, 83);
-            this.dataGridViewReport.Name = "dataGridViewReport";
-            this.dataGridViewReport.RowTemplate.Height = 23;
-            this.dataGridViewReport.Size = new System.Drawing.Size(613, 300);
-            this.dataGridViewReport.TabIndex = 17;
             // 
             // label2
             // 
@@ -176,11 +167,21 @@
             this.checkBoxAutoBan.UseVisualStyleBackColor = true;
             this.checkBoxAutoBan.CheckedChanged += new System.EventHandler(this.checkBoxAutoBan_CheckedChanged);
             // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Location = new System.Drawing.Point(12, 83);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowTemplate.Height = 23;
+            this.dataGridView1.Size = new System.Drawing.Size(1164, 300);
+            this.dataGridView1.TabIndex = 25;
+            // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(637, 603);
+            this.ClientSize = new System.Drawing.Size(1188, 603);
+            this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.checkBoxAutoBan);
             this.Controls.Add(this.buttonUnban);
             this.Controls.Add(this.checkBox1);
@@ -190,14 +191,13 @@
             this.Controls.Add(this.dateTimePickerStart);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.dataGridViewReport);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.richTextBoxMessage);
             this.Controls.Add(this.button1);
             this.Name = "Form3";
             this.Text = "Defense System";
             this.Load += new System.EventHandler(this.Form3_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewReport)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -208,7 +208,6 @@
         private System.Windows.Forms.RichTextBox richTextBoxMessage;
         private System.Windows.Forms.Label label1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private System.Windows.Forms.DataGridView dataGridViewReport;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DateTimePicker dateTimePickerStart;
         private System.Windows.Forms.Label label3;
@@ -218,5 +217,6 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Button buttonUnban;
         private System.Windows.Forms.CheckBox checkBoxAutoBan;
+        private System.Windows.Forms.DataGridView dataGridView1;
     }
 }
