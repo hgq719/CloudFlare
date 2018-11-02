@@ -20,6 +20,7 @@ namespace CoundFlareTools
         static void Main()
         {
             //test
+            //kim test
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AbpBootStrapper();
