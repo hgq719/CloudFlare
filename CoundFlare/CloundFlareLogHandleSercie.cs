@@ -132,7 +132,7 @@ namespace CoundFlareTools.CoundFlare
                               select item).OrderByDescending(a=>a.Count).ToList();
 
                 foreach(var item in result)
-                {
+                { 
                     banItems.Add(new CloudflareLogReportItem
                     {
                         ClientRequestHost = item.ClientRequestHost,
