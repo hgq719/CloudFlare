@@ -19,6 +19,7 @@ namespace CoundFlareTools
         [STAThread]
         static void Main()
         {
+            //test
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AbpBootStrapper();
