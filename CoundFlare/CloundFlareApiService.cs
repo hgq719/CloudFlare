@@ -12,8 +12,17 @@ namespace CoundFlareTools.CoundFlare
 {
     public interface ICloundFlareApiService
     {
-       Task< List<CloudflareLog> > GetCloudflareLogsAsync(DateTime start, DateTime end);
-       List<CloudflareLog> GetCloudflareLogs(DateTime start, DateTime end, out bool retry);
+        Task<List<CloudflareLog>> GetCloudflareLogsAsync(DateTime start, DateTime end);
+        List<CloudflareLog> GetCloudflareLogs(DateTime start, DateTime end, out bool retry);
+        List<FirewallAccessRule> GetAccessRuleList(string ip, string notes);
+        /// <summary>
+        /// valid values: block, challenge, whitelist, js_challenge
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        FirewallAccessRuleResponse CreateAccessRule(FirewallAccessRuleRequest request);
+        FirewallAccessRuleResponse EditAccessRule(string id, FirewallAccessRuleRequest request);
+        FirewallAccessRuleResponse DeleteAccessRule(string id);
     }
     public class CloundFlareApiService : ICloundFlareApiService
     {
@@ -73,6 +82,85 @@ namespace CoundFlareTools.CoundFlare
             }
             return CloudflareLogs;
         }
+        public List<FirewallAccessRule> GetAccessRuleList(string ip, string notes)
+        {
+            List<FirewallAccessRule> firewallAccessRules = new List<FirewallAccessRule>();
+            int page = 1;
+            while (true)
+            {
+                //?page={1}&per_page={2}&notes=my note
+                string url = "https://api.cloudflare.com/client/v4/zones/{0}/firewall/access_rules/rules?page={1}&per_page=500&configuration.value={2}";
+                url = string.Format(url, zoneId, page, ip);
+                if (!string.IsNullOrEmpty(notes))
+                {
+                    url = "https://api.cloudflare.com/client/v4/zones/{0}/firewall/access_rules/rules?page={1}&per_page=500&notes={2}";
+                    url = string.Format(url, zoneId, page, notes);
+                }
+
+                string content = HttpGet(url, 1200);
+                FirewallAccessRuleResponseList firewallAccessRuleResponseList = JsonConvert.DeserializeObject<FirewallAccessRuleResponseList>(content);
+                if (firewallAccessRuleResponseList.success)
+                {
+                    foreach (CreateResult result in firewallAccessRuleResponseList.result)
+                    {
+                        firewallAccessRules.Add(new FirewallAccessRule
+                        {
+                            id = result.id,
+                            notes = result.notes,
+                            mode = result.mode,
+                            configurationTarget = result.configuration.target,
+                            configurationValue = result.configuration.value,
+                            createTime = result.created_on,
+                            modifiedTime = result.modified_on,
+                            scopeId = result.scope.id,
+                            scopeEmail = result.scope.email,
+                            scopeType = result.scope.type,
+                        });
+                    }
+                    
+                    if(firewallAccessRuleResponseList.result_info.page >= firewallAccessRuleResponseList.result_info.total_pages)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        page++;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }            
+            return firewallAccessRules;
+        }
+        public FirewallAccessRuleResponse CreateAccessRule(FirewallAccessRuleRequest request)
+        {
+            string url = "https://api.cloudflare.com/client/v4/zones/{0}/firewall/access_rules/rules";
+            url = string.Format(url, zoneId);
+            string json = JsonConvert.SerializeObject(request);
+            string content = HttpPost(url, json, 90);
+            FirewallAccessRuleResponse response = JsonConvert.DeserializeObject<FirewallAccessRuleResponse>(content);
+            return response;
+        }
+        public FirewallAccessRuleResponse EditAccessRule(string id, FirewallAccessRuleRequest request)
+        {
+            string url = "https://api.cloudflare.com/client/v4/zones/{0}/firewall/access_rules/rules/{1}";
+            url = string.Format(url, zoneId, id);
+            string json = JsonConvert.SerializeObject(request);
+            string content = HttpPut(url, json, 90);
+            FirewallAccessRuleResponse response = JsonConvert.DeserializeObject<FirewallAccessRuleResponse>(content);
+            return response;
+        }
+        public FirewallAccessRuleResponse DeleteAccessRule(string id)
+        {
+            string url = "https://api.cloudflare.com/client/v4/zones/{0}/firewall/access_rules/rules/{1}";
+            url = string.Format(url, zoneId, id);
+            string json = JsonConvert.SerializeObject(new { cascade = "none" });
+            string content = HttpDelete(url, json, 90);
+            FirewallAccessRuleResponse response = JsonConvert.DeserializeObject<FirewallAccessRuleResponse>(content);
+            return response;
+        }
         private string HttpGet(string url, int timeout = 90)
         {
             using (var client = new HttpClient())
@@ -105,6 +193,32 @@ namespace CoundFlareTools.CoundFlare
                 client.DefaultRequestHeaders.Add("X-Auth-Email", authEmail);
                 client.DefaultRequestHeaders.Add("X-Auth-Key", authKey);
                 string strResult = client.PostAsync(url, content).Result.Content.ReadAsStringAsync().Result;
+                return strResult;
+            }
+        }
+        private string HttpPut(string url, string json, int timeout = 90)
+        {
+            using (var client = new HttpClient())
+            {
+                StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+                client.Timeout = TimeSpan.FromSeconds(timeout);
+                client.DefaultRequestHeaders.Add("X-Auth-Email", authEmail);
+                client.DefaultRequestHeaders.Add("X-Auth-Key", authKey);
+                string strResult = client.PutAsync(url, content).Result.Content.ReadAsStringAsync().Result;
+                return strResult;
+            }
+        }
+        private string HttpDelete(string url, string json, int timeout = 90)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, url);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            using (var client = new HttpClient())
+            {
+                client.Timeout = TimeSpan.FromSeconds(timeout);
+                client.DefaultRequestHeaders.Add("X-Auth-Email", authEmail);
+                client.DefaultRequestHeaders.Add("X-Auth-Key", authKey);
+                string strResult = client.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
                 return strResult;
             }
         }

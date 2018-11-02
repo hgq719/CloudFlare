@@ -26,6 +26,11 @@ namespace CoundFlareTools.CoundFlare
         void PushReport(CloudflareLogReport CloudflareLogReport);
         //开启任务
         void TaskStart();
+        /// <summary>
+        /// 禁止Ip
+        /// </summary>
+        /// <param name="ips"></param>
+        void BanIps(List<string> ips);
     }
     public class CloudflareLogHandleSercie : NotificationService, ICloudflareLogHandleSercie
     {
@@ -99,9 +104,9 @@ namespace CoundFlareTools.CoundFlare
             {
                 Stopwatch stopwatch = new Stopwatch();
 
-                var orderby = cloudflareLogReports.Where(a => a.Start >= startTime && a.End <= endTime).OrderBy(a => a.Time);
-                CloudflareLogReport minCloudflareLogReport = orderby.First();
-                CloudflareLogReport maxCloudflareLogReport = orderby.Last();
+                var orderby = cloudflareLogReports.Where(a => a.Start >= startTime && a.End <= endTime).OrderBy(a => a.Time).ToList();
+                CloudflareLogReport minCloudflareLogReport = orderby?.First();
+                CloudflareLogReport maxCloudflareLogReport = orderby?.Last();
 
                 DateTime start = minCloudflareLogReport.Start;
                 DateTime end = maxCloudflareLogReport.End;
@@ -224,7 +229,7 @@ namespace CoundFlareTools.CoundFlare
                                     ClientRequestHost = group.Key.ClientRequestHost,
                                     ClientIP = group.Key.ClientIP,
                                     ClientRequestURI = c.Url,
-                                    Count = group.Count(a => a.ClientRequestURI.Contains(c.Url))
+                                    Count = group.Count(a => a.ClientRequestURI.ToLower().Contains(c.Url.ToLower()))
                                 });
                             });
                         }
@@ -295,6 +300,50 @@ namespace CoundFlareTools.CoundFlare
             Task.WaitAll(taskList.ToArray());//等待所有线程只都行完毕
 
             OnMessage(new MessageEventArgs("本时间段数据处理完毕"));
+        }
+        /// <summary>
+        /// 禁止Ip
+        /// </summary>
+        /// <param name="ips"></param>
+        public void BanIps(List<string> ips)
+        {
+            //List<FirewallAccessRule> firewallAccessRuleList = logsController.GetFirewallAccessRuleList();
+            List<FirewallAccessRule> firewallAccessRuleList = cloundFlareApiService.GetAccessRuleList("", "Add By Defense System");
+            foreach (string ip in ips)
+            {
+                if(!firewallAccessRuleList.Exists(a=>a.configurationValue == ip))
+                {
+                    FirewallAccessRuleResponse firewallAccessRuleResponse = cloundFlareApiService.CreateAccessRule(new FirewallAccessRuleRequest
+                    {
+                        configuration = new Configuration
+                        {
+                            target = "ip",
+                            value = ip,
+                        },
+                        mode = "block",
+                        notes = "Add By Defense System",
+                    });
+
+                    if (firewallAccessRuleResponse.success)
+                    {
+                        logsController.InsertFirewallAccessRule(new List<FirewallAccessRule>() {
+                            new FirewallAccessRule
+                            {
+                                id = firewallAccessRuleResponse.result.id,
+                                notes=firewallAccessRuleResponse.result.notes,
+                                mode=firewallAccessRuleResponse.result.mode,
+                                configurationTarget=firewallAccessRuleResponse.result.configuration.target,
+                                configurationValue=firewallAccessRuleResponse.result.configuration.value,
+                                createTime=firewallAccessRuleResponse.result.created_on,
+                                modifiedTime=firewallAccessRuleResponse.result.modified_on,
+                                scopeId=firewallAccessRuleResponse.result.scope.id,
+                                scopeEmail=firewallAccessRuleResponse.result.scope.email,
+                                scopeType=firewallAccessRuleResponse.result.scope.type,
+                            }
+                        });
+                    }
+                }
+            }
         }
     }
 }

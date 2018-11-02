@@ -37,6 +37,11 @@
             this.dateTimePickerStart = new System.Windows.Forms.DateTimePicker();
             this.label3 = new System.Windows.Forms.Label();
             this.dateTimePickerEnd = new System.Windows.Forms.DateTimePicker();
+            this.checkBoxAutoRun = new System.Windows.Forms.CheckBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.buttonUnban = new System.Windows.Forms.Button();
+            this.checkBoxAutoBan = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewReport)).BeginInit();
             this.SuspendLayout();
             // 
@@ -74,10 +79,10 @@
             // dataGridViewReport
             // 
             this.dataGridViewReport.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewReport.Location = new System.Drawing.Point(12, 67);
+            this.dataGridViewReport.Location = new System.Drawing.Point(12, 83);
             this.dataGridViewReport.Name = "dataGridViewReport";
             this.dataGridViewReport.RowTemplate.Height = 23;
-            this.dataGridViewReport.Size = new System.Drawing.Size(613, 316);
+            this.dataGridViewReport.Size = new System.Drawing.Size(613, 300);
             this.dataGridViewReport.TabIndex = 17;
             // 
             // label2
@@ -91,7 +96,7 @@
             // 
             // dateTimePickerStart
             // 
-            this.dateTimePickerStart.CustomFormat = "yyyy-MM-dd HH:mm:ss";
+            this.dateTimePickerStart.CustomFormat = "yyyy-MM-dd HH:mm";
             this.dateTimePickerStart.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dateTimePickerStart.Location = new System.Drawing.Point(75, 3);
             this.dateTimePickerStart.Name = "dateTimePickerStart";
@@ -109,18 +114,78 @@
             // 
             // dateTimePickerEnd
             // 
-            this.dateTimePickerEnd.CustomFormat = "yyyy-MM-dd HH:mm:ss";
+            this.dateTimePickerEnd.CustomFormat = "yyyy-MM-dd HH:mm";
             this.dateTimePickerEnd.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dateTimePickerEnd.Location = new System.Drawing.Point(75, 30);
             this.dateTimePickerEnd.Name = "dateTimePickerEnd";
             this.dateTimePickerEnd.Size = new System.Drawing.Size(292, 21);
             this.dateTimePickerEnd.TabIndex = 19;
             // 
+            // checkBoxAutoRun
+            // 
+            this.checkBoxAutoRun.AutoSize = true;
+            this.checkBoxAutoRun.Location = new System.Drawing.Point(380, 5);
+            this.checkBoxAutoRun.Name = "checkBoxAutoRun";
+            this.checkBoxAutoRun.Size = new System.Drawing.Size(72, 16);
+            this.checkBoxAutoRun.TabIndex = 20;
+            this.checkBoxAutoRun.Text = "Auto Run";
+            this.checkBoxAutoRun.UseVisualStyleBackColor = true;
+            this.checkBoxAutoRun.CheckedChanged += new System.EventHandler(this.checkBoxAutoRun_CheckedChanged);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(464, 29);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 21;
+            this.button2.Text = "Ban ip";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Checked = true;
+            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox1.Location = new System.Drawing.Point(12, 61);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(96, 16);
+            this.checkBox1.TabIndex = 22;
+            this.checkBox1.Text = "All Selected";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // buttonUnban
+            // 
+            this.buttonUnban.Location = new System.Drawing.Point(545, 28);
+            this.buttonUnban.Name = "buttonUnban";
+            this.buttonUnban.Size = new System.Drawing.Size(75, 23);
+            this.buttonUnban.TabIndex = 23;
+            this.buttonUnban.Text = "Unban ip";
+            this.buttonUnban.UseVisualStyleBackColor = true;
+            this.buttonUnban.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // checkBoxAutoBan
+            // 
+            this.checkBoxAutoBan.AutoSize = true;
+            this.checkBoxAutoBan.Location = new System.Drawing.Point(464, 5);
+            this.checkBoxAutoBan.Name = "checkBoxAutoBan";
+            this.checkBoxAutoBan.Size = new System.Drawing.Size(72, 16);
+            this.checkBoxAutoBan.TabIndex = 24;
+            this.checkBoxAutoBan.Text = "Auto Ban";
+            this.checkBoxAutoBan.UseVisualStyleBackColor = true;
+            this.checkBoxAutoBan.CheckedChanged += new System.EventHandler(this.checkBoxAutoBan_CheckedChanged);
+            // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(637, 603);
+            this.Controls.Add(this.checkBoxAutoBan);
+            this.Controls.Add(this.buttonUnban);
+            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.checkBoxAutoRun);
             this.Controls.Add(this.dateTimePickerEnd);
             this.Controls.Add(this.dateTimePickerStart);
             this.Controls.Add(this.label3);
@@ -148,5 +213,10 @@
         private System.Windows.Forms.DateTimePicker dateTimePickerStart;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker dateTimePickerEnd;
+        private System.Windows.Forms.CheckBox checkBoxAutoRun;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Button buttonUnban;
+        private System.Windows.Forms.CheckBox checkBoxAutoBan;
     }
 }

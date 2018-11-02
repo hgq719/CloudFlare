@@ -1,0 +1,23 @@
+﻿[
+  {
+    "Id": 1,
+    "URL": "livechathandler3.ashx",
+    "Interval": 2,
+    "LimitTimes": 30,
+    "Remark": ""
+  },
+  {
+    "Id": 2,
+    "URL": "chatWindow.aspx",
+    "Interval": 1,
+    "LimitTimes": 10,
+    "Remark": ""
+  },
+  {
+    "Id": 3,
+    "URL": "visitor.ashx",
+    "Interval": 1,
+    "LimitTimes": 5,
+    "Remark": ""
+  }
+]

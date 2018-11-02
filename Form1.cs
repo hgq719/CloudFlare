@@ -20,6 +20,7 @@ namespace CoundFlareTools
         }
 
         public ICloundFlareApiService cloundFlareApiService { get; set; }
+        public ILogsController logsController { get; set; }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -117,6 +118,41 @@ namespace CoundFlareTools
                          where item.ClientRequestURI == config.Url
                                && item.Count/2 >= ( config.LimitTimes / config.Interval )
                          select item ).ToList();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {//3bc0d0634b944c499fcd764f64f0710a
+            //var x = cloundFlareApiService.CreateAccessRule(new FirewallAccessRuleRequest {
+            //    configuration=new Configuration
+            //    {
+            //        target="ip",
+            //        value="0.0.0.0",
+            //    },
+            //    mode= "block",
+            //    notes= "Add By Defense System",
+            //});
+            var xx = cloundFlareApiService.GetAccessRuleList("222222", "a");
+            var y = cloundFlareApiService.DeleteAccessRule("3bc0d0634b944c499fcd764f64f0710a");
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            logsController.DeleteFirewallAccessRule("xxx");
+            logsController.InsertFirewallAccessRule(new List<FirewallAccessRule>() {
+                new FirewallAccessRule{
+                    id = "xxx",
+                    notes="xxx",
+                    mode="block",
+                    configurationTarget="ip",
+                    configurationValue="0.0.0.0",
+                    createTime=DateTime.Now,
+                    modifiedTime=DateTime.Now,
+                    scopeId="xxx",
+                    scopeEmail="xxx",
+                    scopeType="xxx",
+                }
+            });
+            var xx = logsController.GetFirewallAccessRuleList();
         }
     }
 }

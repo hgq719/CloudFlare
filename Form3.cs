@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -21,12 +22,24 @@ namespace CoundFlareTools
             InitializeComponent();
         }
 
+        public Form2 form2 { get; set; }
+
         ILogger logger = Abp.Logging.LogHelper.Logger;
         public ICloudflareLogHandleSercie cloudflareLogHandleSercie { get; set; }
-
+        private bool autoRun = false;
+        private bool autoBan = false;
+        private bool showAutoRunCheckBox = false;
+        private bool showAutoBanCheckBox = false;
+        private bool showUnbanButton = false;
         private void Form3_Load(object sender, EventArgs e)
         {
             cloudflareLogHandleSercie.SubscribeMessageEvent(Notification_Message);
+            showAutoBanCheckBox = Convert.ToBoolean(ConfigurationManager.AppSettings["showAutoBanCheckBox"]);
+            showUnbanButton = Convert.ToBoolean(ConfigurationManager.AppSettings["showUnbanButton"]);
+
+            this.checkBoxAutoRun.Visible = showAutoRunCheckBox;
+            this.checkBoxAutoBan.Visible = showAutoBanCheckBox;
+            this.buttonUnban.Visible = showUnbanButton;
             //CloudflareLogReport cloudflareLogReport = new CloudflareLogReport {
             //     CloudflareLogReportItems = new CloudflareLogReportItem[] {
             //         new CloudflareLogReportItem{
@@ -81,33 +94,74 @@ namespace CoundFlareTools
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            try
+            doWork();
+        }
+        private void doWork()
+        {
+            do
             {
-
-                cloudflareLogHandleSercie.InitQueue(startTime, endTime);
-                cloudflareLogHandleSercie.TaskStart();
-                CloudflareLogReport cloudflareLogReport = cloudflareLogHandleSercie.GetCloudflareLogReport();
-
-                if (this.InvokeRequired)
+                try
                 {
-                    this.Invoke(new Action(() =>
+                    cloudflareLogHandleSercie.InitQueue(startTime, endTime);
+                    cloudflareLogHandleSercie.TaskStart();
+                    CloudflareLogReport cloudflareLogReport = cloudflareLogHandleSercie.GetCloudflareLogReport();
+
+                    if (this.InvokeRequired)
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            button1.Enabled = true;
+                            var order = cloudflareLogReport?.CloudflareLogReportItems?.Where(a => a.Ban).OrderByDescending(a => a.Count).ToArray();
+                            dataGridViewReport.DataSource = order;
+                            dataGridViewReport.Refresh();
+                        }));
+                    }
+                    else
                     {
                         button1.Enabled = true;
-                        var order = cloudflareLogReport.CloudflareLogReportItems.Where(a => a.Ban).OrderByDescending(a => a.Count).ToArray();
-                        dataGridViewReport.DataSource = order;
+                    }
 
-                    }));
+                    if (autoBan == true)
+                    {
+                        List<string> ips = new List<string>();
+                        var items = cloudflareLogReport?.CloudflareLogReportItems?.Where(a => a.Ban).OrderByDescending(a => a.Count).ToArray();
+                        if (items != null)
+                        {
+                            foreach (CloudflareLogReportItem item in items)
+                            {
+                                if (item.Ban)
+                                {
+                                    ips.Add(item.ClientIP);
+                                }
+                            }
+                        }
+                        cloudflareLogHandleSercie.BanIps(ips);
+                    }
+
+                    if (autoRun == true)
+                    {
+                        //去最近5分钟进行重新的分析       
+                        if (this.InvokeRequired)
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                DateTime now = Convert.ToDateTime( DateTime.Now.ToString("yyyy-MM-dd HH:mm:00"));
+                                dateTimePickerStart.Value = now.AddMinutes(-10);
+                                dateTimePickerEnd.Value = now.AddMinutes(-5);
+
+                                startTime = dateTimePickerStart.Value;
+                                endTime = dateTimePickerEnd.Value;
+                            }));
+                        }
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    button1.Enabled = true;
+                    logger.Error(ex.Message);
                 }
             }
-            catch(Exception ex)
-            {
-                logger.Error(ex.Message);
-            }
-
+            while (autoRun);
+           
         }
 
         private DateTime startTime;
@@ -125,10 +179,66 @@ namespace CoundFlareTools
                 return false;
             }
 
-            startTime = dateTimePickerStart.Value;
-            endTime = dateTimePickerEnd.Value;
+            startTime = Convert.ToDateTime( dateTimePickerStart.Value.ToString("yyyy-MM-dd HH:mm:00"));
+            endTime = Convert.ToDateTime(dateTimePickerEnd.Value.ToString("yyyy-MM-dd HH:mm:00")); 
 
             return true;
+        }
+
+        private void checkBoxAutoRun_CheckedChanged(object sender, EventArgs e)
+        {
+            this.autoRun = checkBoxAutoRun.Checked;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            bool isBan = false;
+            if (checkBox1.Checked)
+            {
+                isBan = true;
+            }
+            CloudflareLogReportItem[] items = dataGridViewReport.DataSource as CloudflareLogReportItem[];
+            foreach (CloudflareLogReportItem item in items)
+            {
+                item.Ban = isBan;
+            }
+
+            dataGridViewReport.DataSource = items;
+            dataGridViewReport.Refresh();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            List<string> ips = new List<string>();
+            CloudflareLogReportItem[] items = dataGridViewReport.DataSource as CloudflareLogReportItem[];
+            if (items != null)
+            {
+                foreach(CloudflareLogReportItem item in items)
+                {
+                    if (item.Ban)
+                    {
+                        ips.Add(item.ClientIP);
+                    }
+                }
+            }
+
+            DialogResult dialogResult = MessageBox.Show("Ban？", "warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (dialogResult == DialogResult.Yes)
+            {
+                cloudflareLogHandleSercie.BanIps(ips);
+                MessageBox.Show("Ban Success");
+            }
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            form2.ShowDialog();
+        }
+
+        private void checkBoxAutoBan_CheckedChanged(object sender, EventArgs e)
+        {
+            this.autoBan = checkBoxAutoBan.Checked;
         }
     }
 }

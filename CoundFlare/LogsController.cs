@@ -22,6 +22,9 @@ namespace CoundFlareTools.CoundFlare
         void InsertResultDataBulk(List<IpNeedToBan> ipNeedToBans);
         List<IpNeedToBan> GetIpNeedToBans();
         void InsertIntoIpNeedToBanTable(IpNeedToBan ipNeedToBan);
+        void InsertFirewallAccessRule(List<FirewallAccessRule> firewallAccessRuleList);
+        void DeleteFirewallAccessRule(string id);
+        List<FirewallAccessRule> GetFirewallAccessRuleList();
     }
 
     public class LogsController : ILogsController
@@ -134,7 +137,78 @@ namespace CoundFlareTools.CoundFlare
             conn.Close();
             return ipNeedToBanS;
         }
+        public void InsertFirewallAccessRule(List<FirewallAccessRule> firewallAccessRuleList)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var dt = GetTableFirewallAccessRuleSchema();
+            foreach (FirewallAccessRule role in firewallAccessRuleList)
+            {
+                InsertFirewallAccessRuleRow(role, dt);
+            }
+            InsertFirewallAccessRule(dt);
+            stopwatch.Stop();
+            logger.Debug(string.Format("InsertFirewallAccessRule {0}秒", stopwatch.ElapsedMilliseconds / 1000));
+        }
+        public void DeleteFirewallAccessRule(string id)
+        {
+            using (var conn = new SqlConnection(_connStr))
+            {
+                conn.Open();
+                var sql = @"DELETE
+                      FROM FirewallAccessRule WHERE id=@id";
 
+                var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.Add(new SqlParameter()
+                {
+                    ParameterName = "id",
+                    Value = id,
+                });
+
+                var reader = cmd.ExecuteNonQuery();
+
+                conn.Close();
+            }
+        }
+        public List<FirewallAccessRule> GetFirewallAccessRuleList()
+        {
+            List<FirewallAccessRule> firewallAccessRules = new List<FirewallAccessRule>();
+            var stopwatch = new Stopwatch();
+            using (var conn = new SqlConnection(_connStr))
+            {
+                conn.Open();
+                var sql = @"SELECT *
+                      FROM FirewallAccessRule";
+
+                var cmd = new SqlCommand(sql, conn);
+                var reader = cmd.ExecuteReader();
+                if (!reader.HasRows)
+                {
+                }
+                else
+                {
+                    while (reader.Read())
+                    {
+                        firewallAccessRules.Add(new FirewallAccessRule()
+                        {
+                            id = Convert.ToString(reader["id"]),
+                            notes = Convert.ToString(reader["notes"]),
+                            mode = Convert.ToString(reader["mode"]),
+                            configurationTarget = Convert.ToString(reader["configurationTarget"]),
+                            configurationValue = Convert.ToString(reader["configurationValue"]),
+                            createTime = Convert.ToDateTime(reader["createTime"]),
+                            modifiedTime = Convert.ToDateTime(reader["modifiedTime"]),
+                            scopeId = Convert.ToString(reader["scopeId"]),
+                            scopeEmail = Convert.ToString(reader["scopeEmail"]),
+                            scopeType = Convert.ToString(reader["scopeType"]),
+                        });
+                    }
+                }
+                reader.Close();
+                conn.Close();
+            }
+            return firewallAccessRules;
+        }
         private void InsertRow(CloudflareLog log, DataTable table)
         {
             var dr = table.NewRow();
@@ -259,6 +333,21 @@ namespace CoundFlareTools.CoundFlare
             dr[5] = log.Remark;
             table.Rows.Add(dr);
         }
+        private void InsertFirewallAccessRuleRow(FirewallAccessRule role, DataTable table)
+        {
+            var dr = table.NewRow();
+            dr[0] = role.id;
+            dr[1] = role.notes;
+            dr[2] = role.mode;
+            dr[3] = role.configurationTarget;
+            dr[4] = role.configurationValue;
+            dr[5] = role.createTime;
+            dr[6] = role.modifiedTime;
+            dr[7] = role.scopeId;
+            dr[8] = role.scopeEmail;
+            dr[9] = role.scopeType;
+            table.Rows.Add(dr);
+        }
         public void InsertResultData(List<IpNeedToBan> ipNeedToBans)
         {
             var stopwatch = new Stopwatch();
@@ -316,6 +405,22 @@ namespace CoundFlareTools.CoundFlare
         private void InsertResultData(DataTable resultDt)
         {
             var tableName = "IpNeedToBan";
+            var stopwatch = new Stopwatch();
+            using (var conn = new SqlConnection(_connStr))
+            {
+                var bulkCopy = new SqlBulkCopy(conn);
+                bulkCopy.DestinationTableName = tableName;
+                bulkCopy.BatchSize = resultDt.Rows.Count;
+                conn.Open();
+                stopwatch.Start();
+                bulkCopy.WriteToServer(resultDt);
+                stopwatch.Stop();
+            }
+            Console.WriteLine($"插入{tableName}表{resultDt.Rows.Count}条记录共花费{stopwatch.ElapsedMilliseconds}毫秒");
+        }
+        private void InsertFirewallAccessRule(DataTable resultDt)
+        {
+            var tableName = "FirewallAccessRule";
             var stopwatch = new Stopwatch();
             using (var conn = new SqlConnection(_connStr))
             {
@@ -415,7 +520,24 @@ namespace CoundFlareTools.CoundFlare
             });
             return dt;
         }
-
+        private DataTable GetTableFirewallAccessRuleSchema()
+        {
+            var dt = new DataTable();
+            dt.Columns.AddRange(new DataColumn[]
+            {
+                new DataColumn("id", typeof(string)),
+                new DataColumn("notes", typeof(string)),
+                new DataColumn("mode", typeof(string)),
+                new DataColumn("configurationTarget", typeof(string)),
+                new DataColumn("configurationValue", typeof(string)),
+                new DataColumn("createTime", typeof(DateTime)),
+                new DataColumn("modifiedTime", typeof(DateTime)),
+                new DataColumn("scopeId", typeof(string)),
+                new DataColumn("scopeEmail", typeof(string)),
+                new DataColumn("scopeType", typeof(string)),
+            });
+            return dt;
+        }
         private SqlDataReader GetIpNeedToBanReaders(SqlConnection conn)
         {
             var sql = @"SELECT [IP]
@@ -440,6 +562,57 @@ namespace CoundFlareTools.CoundFlare
 
             var cmd = new SqlCommand(sql, conn);
             return cmd.ExecuteReader();
+        }
+    }
+    public class LogsControllerImpByLog : ILogsController
+    {
+        public void DeleteFirewallAccessRule(string id)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public List<FirewallAccessRule> GetFirewallAccessRuleList()
+        {
+            //throw new NotImplementedException();
+            return new List<FirewallAccessRule>();
+        }
+
+        public List<IpNeedToBan> GetIpNeedToBans()
+        {
+            //throw new NotImplementedException();
+            return new List<IpNeedToBan>();
+        }
+
+        public List<RequestLimitConfig> GetRequestLimitConfigs()
+        {
+            string json = Utils.GetFileContext("CoundFlare/RequestLimitConfiguration.json");
+            List<RequestLimitConfig> requestLimitConfigs = JsonConvert.DeserializeObject<List<RequestLimitConfig>>(json);
+            return requestLimitConfigs;
+        }
+
+        public void InsertData(DateTime startTime, List<CloudflareLog> CloudflareLogs)
+        {
+            //throw new NotImplementedException();            
+        }
+
+        public void InsertFirewallAccessRule(List<FirewallAccessRule> firewallAccessRuleList)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void InsertIntoIpNeedToBanTable(IpNeedToBan ipNeedToBan)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void InsertResultData(List<IpNeedToBan> ipNeedToBans)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void InsertResultDataBulk(List<IpNeedToBan> ipNeedToBans)
+        {
+            //throw new NotImplementedException();
         }
     }
 }

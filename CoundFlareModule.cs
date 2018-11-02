@@ -30,8 +30,10 @@ typeof(AbpAutoMapperModule)
 
             IocManager.IocContainer.Register(
                 Component.For<Form1>(),
-                Component.For<Form3>(),
-                Component.For<ILogsController>().ImplementedBy<LogsController>().LifestyleTransient(),
+                Component.For<Form2>(),
+                Component.For<Form3>(), 
+                //Component.For<ILogsController>().ImplementedBy<LogsController>().LifestyleTransient(),
+                Component.For<ILogsController>().ImplementedBy<LogsControllerImpByLog>().LifestyleTransient(),
                 Component.For<ICloudflareLogHandleSercie>().ImplementedBy<CloudflareLogHandleSercie>().LifestyleTransient(),
                 Component.For<ICloundFlareApiService>().ImplementedBy<CloundFlareApiService>().LifestyleTransient(),
                 Classes.FromThisAssembly().Pick()
@@ -52,5 +54,6 @@ typeof(AbpAutoMapperModule)
             });
 
         }
+
     }
 }
