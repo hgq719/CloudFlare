@@ -46,6 +46,7 @@
             this.comboBoxFilter = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxComment = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -215,11 +216,21 @@
             this.textBoxComment.Size = new System.Drawing.Size(742, 21);
             this.textBoxComment.TabIndex = 29;
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(1086, 515);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(65, 12);
+            this.label6.TabIndex = 30;
+            this.label6.Text = "total:1200";
+            // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1188, 723);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.textBoxComment);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.comboBoxFilter);
@@ -265,5 +276,6 @@
         private System.Windows.Forms.ComboBox comboBoxFilter;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBoxComment;
+        private System.Windows.Forms.Label label6;
     }
 }

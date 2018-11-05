@@ -31,7 +31,8 @@ typeof(AbpAutoMapperModule)
             IocManager.IocContainer.Register(
                 Component.For<Form1>(),
                 Component.For<Form2>(),
-                Component.For<Form3>(), 
+                Component.For<Form3>(),
+                Component.For<Form4>(),
                 //Component.For<ILogsController>().ImplementedBy<LogsController>().LifestyleTransient(),
                 Component.For<ILogsController>().ImplementedBy<LogsControllerImpByLog>().LifestyleTransient(),
                 Component.For<ICloudflareLogHandleSercie>().ImplementedBy<CloudflareLogHandleSercie>().LifestyleTransient(),
