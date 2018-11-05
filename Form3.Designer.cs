@@ -42,6 +42,10 @@
             this.buttonUnban = new System.Windows.Forms.Button();
             this.checkBoxAutoBan = new System.Windows.Forms.CheckBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.label4 = new System.Windows.Forms.Label();
+            this.comboBoxFilter = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBoxComment = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -57,7 +61,7 @@
             // 
             // richTextBoxMessage
             // 
-            this.richTextBoxMessage.Location = new System.Drawing.Point(12, 401);
+            this.richTextBoxMessage.Location = new System.Drawing.Point(12, 530);
             this.richTextBoxMessage.Name = "richTextBoxMessage";
             this.richTextBoxMessage.Size = new System.Drawing.Size(1164, 190);
             this.richTextBoxMessage.TabIndex = 15;
@@ -66,7 +70,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(10, 386);
+            this.label1.Location = new System.Drawing.Point(10, 515);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(77, 12);
             this.label1.TabIndex = 16;
@@ -138,7 +142,7 @@
             this.checkBox1.AutoSize = true;
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(12, 61);
+            this.checkBox1.Location = new System.Drawing.Point(924, 103);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(96, 16);
             this.checkBox1.TabIndex = 22;
@@ -170,17 +174,56 @@
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(12, 83);
+            this.dataGridView1.Location = new System.Drawing.Point(12, 124);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 23;
-            this.dataGridView1.Size = new System.Drawing.Size(1164, 300);
+            this.dataGridView1.Size = new System.Drawing.Size(1164, 388);
             this.dataGridView1.TabIndex = 25;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(18, 79);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(41, 12);
+            this.label4.TabIndex = 26;
+            this.label4.Text = "filter";
+            // 
+            // comboBoxFilter
+            // 
+            this.comboBoxFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxFilter.FormattingEnabled = true;
+            this.comboBoxFilter.Location = new System.Drawing.Point(75, 76);
+            this.comboBoxFilter.Name = "comboBoxFilter";
+            this.comboBoxFilter.Size = new System.Drawing.Size(292, 20);
+            this.comboBoxFilter.TabIndex = 27;
+            this.comboBoxFilter.SelectedIndexChanged += new System.EventHandler(this.comboBoxFilter_SelectedIndexChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(381, 79);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(47, 12);
+            this.label5.TabIndex = 28;
+            this.label5.Text = "Comment";
+            // 
+            // textBoxComment
+            // 
+            this.textBoxComment.Location = new System.Drawing.Point(434, 76);
+            this.textBoxComment.Name = "textBoxComment";
+            this.textBoxComment.Size = new System.Drawing.Size(742, 21);
+            this.textBoxComment.TabIndex = 29;
             // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1188, 603);
+            this.ClientSize = new System.Drawing.Size(1188, 723);
+            this.Controls.Add(this.textBoxComment);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.comboBoxFilter);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.checkBoxAutoBan);
             this.Controls.Add(this.buttonUnban);
@@ -218,5 +261,9 @@
         private System.Windows.Forms.Button buttonUnban;
         private System.Windows.Forms.CheckBox checkBoxAutoBan;
         private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox comboBoxFilter;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBoxComment;
     }
 }

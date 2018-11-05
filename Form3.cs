@@ -72,7 +72,7 @@ namespace CoundFlareTools
             {
                 if (richTextBoxMessage.TextLength > 1000)
                 {
-                    richTextBoxMessage.Text = "";
+                    richTextBoxMessage.Text = ""; 
                 }
                 richTextBoxMessage.AppendText(string.Format("{0}:{1}", DateTime.Now.ToString("hh:mm:ss"), e.Message + Environment.NewLine));
             }
@@ -112,6 +112,13 @@ namespace CoundFlareTools
                         {
                             button1.Enabled = true;
                             var order = cloudflareLogReport?.CloudflareLogReportItems?.Where(a => a.Ban).OrderByDescending(a => a.Count ).ToArray();
+                            cloudflareLogReportItems = order;
+
+                            List<string> filterStringList = new List<string>() { "all" };
+                            filterStringList.AddRange(cloudflareLogReportItems.Select(a => a.ClientRequestHost).Distinct());
+
+                            comboBoxFilter.DataSource = filterStringList;
+
                             dataGridView1.DataSource = order;
                             dataGridView1.Columns[1].Width = 175;                  
                             dataGridView1.Columns[2].Width = 500;
@@ -137,7 +144,15 @@ namespace CoundFlareTools
                                 }
                             }
                         }
-                        cloudflareLogHandleSercie.BanIps(ips);
+
+                        comment = textBoxComment.Text;
+                        if (string.IsNullOrWhiteSpace(comment))
+                        {
+                            MessageBox.Show("comment is required.", "warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        cloudflareLogHandleSercie.BanIps(ips, comment);
                     }
 
                     if (autoRun == true)
@@ -168,6 +183,8 @@ namespace CoundFlareTools
 
         private DateTime startTime;
         private DateTime endTime;
+        private string comment;
+        private CloudflareLogReportItem[] cloudflareLogReportItems;
         private bool Check()
         {
             if (string.IsNullOrEmpty(dateTimePickerStart.Text))
@@ -224,10 +241,19 @@ namespace CoundFlareTools
                 }
             }
 
+            comment = textBoxComment.Text;
+            if (string.IsNullOrWhiteSpace(comment))
+            {
+                MessageBox.Show("comment is required.", "warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                textBoxComment.Focus();
+                return;
+            }
+
             DialogResult dialogResult = MessageBox.Show("Ban？", "warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.Yes)
             {
-                cloudflareLogHandleSercie.BanIps(ips);
+                ips = new List<string>() { "0.0.0.0" };
+                cloudflareLogHandleSercie.BanIps(ips, comment);
                 MessageBox.Show("Ban Success");
             }
 
@@ -241,6 +267,25 @@ namespace CoundFlareTools
         private void checkBoxAutoBan_CheckedChanged(object sender, EventArgs e)
         {
             this.autoBan = checkBoxAutoBan.Checked;
+        }
+
+        private void comboBoxFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string filterString = comboBoxFilter.Text;
+            var order = cloudflareLogReportItems;
+            if (filterString == "all")
+            {
+
+            }
+            else
+            {
+                order = cloudflareLogReportItems.Where(a => a.ClientRequestHost == filterString).OrderByDescending(a=>a.Count).ThenByDescending(a=>a.ClientIP).ToArray();
+            }
+            
+            dataGridView1.DataSource = order;
+            dataGridView1.Columns[1].Width = 175;
+            dataGridView1.Columns[2].Width = 500;
+            dataGridView1.Refresh();
         }
     }
 }

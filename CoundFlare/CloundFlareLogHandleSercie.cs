@@ -30,7 +30,7 @@ namespace CoundFlareTools.CoundFlare
         /// 禁止Ip
         /// </summary>
         /// <param name="ips"></param>
-        void BanIps(List<string> ips);
+        void BanIps(List<string> ips, string comment);
     }
     public class CloudflareLogHandleSercie : NotificationService, ICloudflareLogHandleSercie
     {
@@ -306,7 +306,7 @@ namespace CoundFlareTools.CoundFlare
         /// 禁止Ip
         /// </summary>
         /// <param name="ips"></param>
-        public void BanIps(List<string> ips)
+        public void BanIps(List<string> ips ,string comment)
         {
             //List<FirewallAccessRule> firewallAccessRuleList = logsController.GetFirewallAccessRuleList();
             List<FirewallAccessRule> firewallAccessRuleList = cloundFlareApiService.GetAccessRuleList("", "Add By Defense System");
@@ -321,8 +321,8 @@ namespace CoundFlareTools.CoundFlare
                             target = "ip",
                             value = ip,
                         },
-                        mode = "block",
-                        notes = "Add By Defense System",
+                        mode = "challenge",
+                        notes = string.Format("{0}({1})", comment, "Add By Defense System"),
                     });
 
                     if (firewallAccessRuleResponse.success)

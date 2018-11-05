@@ -154,5 +154,17 @@ namespace CoundFlareTools
             });
             var xx = logsController.GetFirewallAccessRuleList();
         }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("start？", "warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (dialogResult == DialogResult.Yes)
+            {
+             
+            }
+
+            Form4 frm = new Form4();
+            frm.ShowDialog();
+        }
     }
 }
