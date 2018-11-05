@@ -252,7 +252,7 @@ namespace CoundFlareTools
             DialogResult dialogResult = MessageBox.Show("Ban？", "warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.Yes)
             {
-                ips = new List<string>() { "0.0.0.0" };
+                //ips = new List<string>() { "0.0.0.0" };
                 cloudflareLogHandleSercie.BanIps(ips, comment);
                 MessageBox.Show("Ban Success");
             }
