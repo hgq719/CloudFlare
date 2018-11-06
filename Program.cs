@@ -23,8 +23,8 @@ namespace CoundFlareTools
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AbpBootStrapper();
-            //SetDataDirectory();
-            Form4 frm = bootstrapper.IocManager.Resolve<Form4>();
+            SetDataDirectory();
+            Form1 frm = bootstrapper.IocManager.Resolve<Form1>();
             Application.Run(frm);
         }
 
@@ -36,6 +36,15 @@ namespace CoundFlareTools
                     .WithConfig("log4net.config")
                 );
             bootstrapper.Initialize();
+        }
+        static void SetDataDirectory()
+        {
+            string dataDir = AppDomain.CurrentDomain.BaseDirectory;
+            //dataDir = dataDir.Remove(dataDir.IndexOf(@"\bin\"));
+            dataDir =  string.Format("{0}{1}", dataDir, "CoundFlare");
+            AppDomain.CurrentDomain.SetData("DataDirectory", dataDir);
+
+            var xx = AppDomain.CurrentDomain.GetData("DataDirectory");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using CoundFlareTools.CoundFlare;
+﻿using CoundFlareTools.Core;
+using CoundFlareTools.CoundFlare;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace CoundFlareTools
 
         public ICloundFlareApiService cloundFlareApiService { get; set; }
         public ILogsController logsController { get; set; }
+        public IRequestlimitconfigAppService requestlimitconfigAppService { get; set; }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -171,6 +173,11 @@ namespace CoundFlareTools
         private void button6_Click(object sender, EventArgs e)
         {
             var xx = cloundFlareApiService.GetRateLimitRuleList();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            var xx = requestlimitconfigAppService.GetAll();
         }
     }
 }

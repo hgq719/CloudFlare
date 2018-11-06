@@ -2,7 +2,12 @@
 using Abp.Dependency;
 using Abp.Modules;
 using Castle.MicroKernel.Registration;
+using CoundFlareTools.Core.Infrastructure.NHibernate;
 using CoundFlareTools.CoundFlare;
+using Framework.Application;
+using Framework.Domain;
+using Framework.Domain.Uow;
+using Framwork.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,20 +18,23 @@ using System.Threading.Tasks;
 namespace CoundFlareTools
 {
     [DependsOn(
-typeof(AbpAutoMapperModule)
-    )]
+    typeof(FrameworkDomainModule),
+    typeof(FrameworkInfrastructureModule),
+    typeof(FrameworkApplicationModule),
+    typeof(AbpAutoMapperModule)
+        )]
     public class CoundFlareModule : AbpModule
     {
         public override void PreInitialize()
         {
-            //Configuration.ReplaceService(typeof(IFrameworkDbSessionConfiguration), () =>
-            //{
-            //    IocManager.IocContainer.Register(
-            //        Component.For<IFrameworkDbSessionConfiguration>()
-            //            .ImplementedBy<BotUpdateDbSessionConfiguration>()
-            //            .LifestyleTransient()
-            //        );
-            //});
+            Configuration.ReplaceService(typeof(IFrameworkDbSessionConfiguration), () =>
+            {
+                IocManager.IocContainer.Register(
+                    Component.For<IFrameworkDbSessionConfiguration>()
+                        .ImplementedBy<CloudflareDbSessionConfiguration>()
+                        .LifestyleTransient()
+                    );
+            });
 
             IocManager.IocContainer.Register(
                 Component.For<Form1>(),
