@@ -287,5 +287,37 @@ namespace CoundFlareTools
             dataGridView1.Columns[2].Width = 500;
             dataGridView1.Refresh();
         }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            List<string> ips = new List<string>();
+            CloudflareLogReportItem[] items = dataGridView1.DataSource as CloudflareLogReportItem[];
+            if (items != null)
+            {
+                foreach (CloudflareLogReportItem item in items)
+                {
+                    if (item.Ban)
+                    {
+                        ips.Add(item.ClientIP);
+                    }
+                }
+            }
+
+            comment = textBoxComment.Text;
+            if (string.IsNullOrWhiteSpace(comment))
+            {
+                MessageBox.Show("comment is required.", "warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                textBoxComment.Focus();
+                return;
+            }
+
+            DialogResult dialogResult = MessageBox.Show("Whitelist？", "warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (dialogResult == DialogResult.Yes)
+            {
+                //ips = new List<string>() { "0.0.0.0" };
+                cloudflareLogHandleSercie.WhitelistIps(ips, comment);
+                MessageBox.Show("Ban Success");
+            }
+        }
     }
 }

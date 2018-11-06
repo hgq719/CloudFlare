@@ -198,6 +198,7 @@
     <Compile Include="CoundFlare\FirewallAccessRuleRequest.cs" />
     <Compile Include="CoundFlare\IpNeedToBan.cs" />
     <Compile Include="CoundFlare\LogsController.cs" />
+    <Compile Include="CoundFlare\RateLimitRule.cs" />
     <Compile Include="CoundFlare\RequestLimitConfig.cs" />
     <Compile Include="ExcelHelperByNPOI.cs" />
     <Compile Include="Form1.cs">

@@ -30,7 +30,7 @@ namespace CoundFlareTools
             {
                 firewallAccessRules = cloundFlareApiService.GetAccessRuleList(ip, "");
             }
-            var orderBy = firewallAccessRules.OrderByDescending(a => a.createTime).ToArray();
+            var orderBy = firewallAccessRules.Where(a=>a.mode == EnumMode.challenge).OrderByDescending(a => a.createTime).ToArray();
             dataGridView1.DataSource = orderBy;
             dataGridView1.Refresh();
         }

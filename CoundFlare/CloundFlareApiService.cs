@@ -23,6 +23,10 @@ namespace CoundFlareTools.CoundFlare
         FirewallAccessRuleResponse CreateAccessRule(FirewallAccessRuleRequest request);
         FirewallAccessRuleResponse EditAccessRule(string id, FirewallAccessRuleRequest request);
         FirewallAccessRuleResponse DeleteAccessRule(string id);
+        List<RateLimitRule> GetRateLimitRuleList();
+        CreateRateLimitResponse CreateRateLimit(RateLimitRule rateLimitRule);
+        UpdateRateLimitResponse UpdateRateLimit(RateLimitRule rateLimitRule);
+        DeleteRateLimitResponse DeleteRateLimit(string id);
     }
     public class CloundFlareApiService : ICloundFlareApiService
     {
@@ -161,6 +165,67 @@ namespace CoundFlareTools.CoundFlare
             FirewallAccessRuleResponse response = JsonConvert.DeserializeObject<FirewallAccessRuleResponse>(content);
             return response;
         }
+        public List<RateLimitRule> GetRateLimitRuleList()
+        {
+            List<RateLimitRule> rateLimitRules = new List<RateLimitRule>();
+            int page = 1;
+            while (true)
+            {
+                //?page={1}&per_page={2}&notes=my note
+                string url = "https://api.cloudflare.com/client/v4/zones/{0}/rate_limits?page={1}&per_page=20";
+                url = string.Format(url, zoneId, page);               
+                string content = HttpGet(url, 1200);
+                RateLimitResponse rateLimitResponse = JsonConvert.DeserializeObject<RateLimitResponse>(content);
+                if (rateLimitResponse.success)
+                {
+                    rateLimitRules.AddRange(rateLimitResponse.result);
+                    if (rateLimitResponse.result_info.page >= rateLimitResponse.result_info.total_pages)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        page++;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return rateLimitRules;
+        }
+        public CreateRateLimitResponse CreateRateLimit(RateLimitRule rateLimitRule)
+        {
+            CreateRateLimitResponse createRateLimitResponse = new CreateRateLimitResponse();
+            string url = "https://api.cloudflare.com/client/v4/zones/{0}/rate_limits";
+            url = string.Format(url, zoneId);
+            string json = JsonConvert.SerializeObject(rateLimitRule);
+            string content = HttpPost(url, json, 90);
+            createRateLimitResponse = JsonConvert.DeserializeObject<CreateRateLimitResponse>(content);
+            return createRateLimitResponse;
+        }
+        public UpdateRateLimitResponse UpdateRateLimit(RateLimitRule rateLimitRule)
+        {
+            UpdateRateLimitResponse updateRateLimitResponse = new UpdateRateLimitResponse();
+            string url = "https://api.cloudflare.com/client/v4/zones/{0}/rate_limits";
+            url = string.Format(url, zoneId);
+            string json = JsonConvert.SerializeObject(rateLimitRule);
+            string content = HttpPut(url, json, 90);
+            updateRateLimitResponse = JsonConvert.DeserializeObject<UpdateRateLimitResponse>(content);
+            return updateRateLimitResponse;
+        }
+        public DeleteRateLimitResponse DeleteRateLimit(string id)
+        {
+            DeleteRateLimitResponse deleteRateLimitResponse = new DeleteRateLimitResponse();
+            string url = "https://api.cloudflare.com/client/v4/zones/{0}/rate_limits/{1}";
+            url = string.Format(url, zoneId, id);
+            string json = "";
+            string content = HttpDelete(url, json, 90);
+            deleteRateLimitResponse = JsonConvert.DeserializeObject<DeleteRateLimitResponse>(content);
+            return deleteRateLimitResponse;
+        }
+
         private string HttpGet(string url, int timeout = 90)
         {
             using (var client = new HttpClient())
@@ -211,7 +276,10 @@ namespace CoundFlareTools.CoundFlare
         private string HttpDelete(string url, string json, int timeout = 90)
         {
             var request = new HttpRequestMessage(HttpMethod.Delete, url);
-            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            if (!string.IsNullOrWhiteSpace(json))
+            {
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
 
             using (var client = new HttpClient())
             {

@@ -122,16 +122,17 @@ namespace CoundFlareTools
 
         private void button3_Click(object sender, EventArgs e)
         {//3bc0d0634b944c499fcd764f64f0710a
-            //var x = cloundFlareApiService.CreateAccessRule(new FirewallAccessRuleRequest {
-            //    configuration=new Configuration
-            //    {
-            //        target="ip",
-            //        value="0.0.0.0",
-            //    },
-            //    mode= "block",
-            //    notes= "Add By Defense System",
-            //});
-            var xx = cloundFlareApiService.GetAccessRuleList("222222", "a");
+            var x = cloundFlareApiService.CreateAccessRule(new FirewallAccessRuleRequest
+            {
+                configuration = new Configuration
+                {
+                    target = "ip",
+                    value = "0.0.0.0",
+                },
+                mode = EnumMode.challenge,
+                notes = "Add By Defense System",
+            });
+            var xx = cloundFlareApiService.GetAccessRuleList("1", "Add By Defense System");
             var y = cloundFlareApiService.DeleteAccessRule("3bc0d0634b944c499fcd764f64f0710a");
         }
 
@@ -142,7 +143,7 @@ namespace CoundFlareTools
                 new FirewallAccessRule{
                     id = "xxx",
                     notes="xxx",
-                    mode="block",
+                    mode=EnumMode.block,
                     configurationTarget="ip",
                     configurationValue="0.0.0.0",
                     createTime=DateTime.Now,
@@ -165,6 +166,11 @@ namespace CoundFlareTools
 
             Form4 frm = new Form4();
             frm.ShowDialog();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var xx = cloundFlareApiService.GetRateLimitRuleList();
         }
     }
 }
