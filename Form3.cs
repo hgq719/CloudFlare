@@ -81,6 +81,8 @@ namespace CoundFlareTools
 
         private void button1_Click(object sender, EventArgs e)
         {
+            //CloundFlareApiService cloundFlareLogHandleSercie = new CloundFlareApiService();
+            //cloundFlareLogHandleSercie.SendAlertMail();
             button1.Enabled = false;
             DialogResult dialogResult = MessageBox.Show("start？", "warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.Yes)

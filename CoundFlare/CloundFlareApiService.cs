@@ -1,4 +1,6 @@
 ﻿using Castle.Core.Logging;
+using MailBee.Mime;
+using MailBee.SmtpMail;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,6 +25,7 @@ namespace CoundFlareTools.CoundFlare
         FirewallAccessRuleResponse CreateAccessRule(FirewallAccessRuleRequest request);
         FirewallAccessRuleResponse EditAccessRule(string id, FirewallAccessRuleRequest request);
         FirewallAccessRuleResponse DeleteAccessRule(string id);
+        void SendAlertMail();
     }
     public class CloundFlareApiService : ICloundFlareApiService
     {
@@ -160,6 +163,81 @@ namespace CoundFlareTools.CoundFlare
             string content = HttpDelete(url, json, 90);
             FirewallAccessRuleResponse response = JsonConvert.DeserializeObject<FirewallAccessRuleResponse>(content);
             return response;
+        }
+        public void SendAlertMail()
+        {
+            //Smtp.LicenseKey = "MN200-9D556A4D55E4550955B155857-8F20";
+            MailBee.Global.LicenseKey = "MN110-BD758AFA74AB752575128ACF6CAE-EEE7";
+
+            #region Create SMTP Object
+            var smtpObject = new Smtp();
+
+            var server = new SmtpServer();
+            server.Name = "smtp.office365.com";
+            server.Port = 465; //994
+            server.AccountName = "kim@comm100.com";
+            server.Password = "Lsq4rfv%TGB";
+            server.SslMode = MailBee.Security.SslStartupMode.UseStartTls;
+            server.AuthMethods = MailBee.AuthenticationMethods.SaslLogin;
+            smtpObject.SmtpServers.Add(server);
+            #endregion
+            
+            #region Create Message
+            var message = new MailMessage();
+            message.From = new EmailAddress("kim@comm100.com", "kim");
+            message.To.AsString = "hgq719@163.com";
+
+            message.Subject = "测试攻击预警邮件";
+            message.BodyPlainText = "现在正发生黑客攻击";
+            message.MailTransferEncodingHtml = MailTransferEncoding.QuotedPrintable;
+            message.Charset = "utf-8";
+            message.EncodeAllHeaders(Encoding.UTF8, HeaderEncodingOptions.Base64);
+            smtpObject.Message = message;
+            #endregion
+
+            #region Send
+            if (smtpObject.Connect())
+            {
+                if (!smtpObject.Send())
+                {
+                    throw new Exception();
+                }
+            }
+            else
+            {
+                throw new Exception();
+            }
+            if (smtpObject.IsConnected) smtpObject.Disconnect();
+            #endregion
+
+            //var msg = new MailMessage();
+            //msg.To.Add("kim@comm100.com");
+            //msg.From = new MailAddress("hgq719@163.com", "hgq719", Encoding.UTF8);
+
+            //msg.Subject = "测试攻击预警邮件";
+            //msg.SubjectEncoding = Encoding.UTF8;
+
+            //msg.Body = "现在正发生黑客攻击";
+            //msg.BodyEncoding = Encoding.UTF8;
+            //msg.IsBodyHtml = false;
+            //msg.Priority = MailPriority.High;
+
+            //var client = new SmtpClient();
+            //client.Credentials = new System.Net.NetworkCredential("hgq719@163.com", "Lsq1qaz@WSX");
+            //client.Port = 465; //994
+            //client.Host = "smtp.163.com";
+            //client.EnableSsl = true;
+            //object userState = msg;
+            //try
+            //{
+            //    client.SendAsync(msg,userState);
+
+            //}
+            //catch (Exception ex)
+            //{
+
+            //    throw ex;
+            //}
         }
         private string HttpGet(string url, int timeout = 90)
         {
