@@ -31,15 +31,20 @@ namespace CoundFlareTools
         private bool showAutoRunCheckBox = false;
         private bool showAutoBanCheckBox = false;
         private bool showUnbanButton = false;
+        private bool showWhitelistButton = false;
+
         private void Form3_Load(object sender, EventArgs e)
         {
             cloudflareLogHandleSercie.SubscribeMessageEvent(Notification_Message);
             showAutoBanCheckBox = Convert.ToBoolean(ConfigurationManager.AppSettings["showAutoBanCheckBox"]);
             showUnbanButton = Convert.ToBoolean(ConfigurationManager.AppSettings["showUnbanButton"]);
+            showWhitelistButton = Convert.ToBoolean(ConfigurationManager.AppSettings["showWhitelistButton"]);
 
             this.checkBoxAutoRun.Visible = showAutoRunCheckBox;
             this.checkBoxAutoBan.Visible = showAutoBanCheckBox;
             this.buttonUnban.Visible = showUnbanButton;
+            this.buttonWhitelist.Visible = showWhitelistButton;
+
             //CloudflareLogReport cloudflareLogReport = new CloudflareLogReport {
             //     CloudflareLogReportItems = new CloudflareLogReportItem[] {
             //         new CloudflareLogReportItem{

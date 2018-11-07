@@ -47,7 +47,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxComment = new System.Windows.Forms.TextBox();
             this.labelTotal = new System.Windows.Forms.Label();
-            this.button3 = new System.Windows.Forms.Button();
+            this.buttonWhitelist = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -227,15 +227,15 @@
             this.labelTotal.TabIndex = 30;
             this.labelTotal.Text = "total:0";
             // 
-            // button3
+            // buttonWhitelist
             // 
-            this.button3.Location = new System.Drawing.Point(626, 28);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 31;
-            this.button3.Text = "Whitelist";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click_1);
+            this.buttonWhitelist.Location = new System.Drawing.Point(626, 28);
+            this.buttonWhitelist.Name = "buttonWhitelist";
+            this.buttonWhitelist.Size = new System.Drawing.Size(75, 23);
+            this.buttonWhitelist.TabIndex = 31;
+            this.buttonWhitelist.Text = "Whitelist";
+            this.buttonWhitelist.UseVisualStyleBackColor = true;
+            this.buttonWhitelist.Click += new System.EventHandler(this.button3_Click_1);
             // 
             // button4
             // 
@@ -253,7 +253,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1188, 723);
             this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.buttonWhitelist);
             this.Controls.Add(this.labelTotal);
             this.Controls.Add(this.textBoxComment);
             this.Controls.Add(this.label5);
@@ -301,7 +301,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBoxComment;
         private System.Windows.Forms.Label labelTotal;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button buttonWhitelist;
         private System.Windows.Forms.Button button4;
     }
 }
