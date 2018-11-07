@@ -586,7 +586,8 @@ namespace CoundFlareTools.CoundFlare
         public List<RequestLimitConfig> GetRequestLimitConfigs()
         {
             string json = Utils.GetFileContext("CoundFlare/RequestLimitConfiguration.json");
-            List<RequestLimitConfig> requestLimitConfigs = JsonConvert.DeserializeObject<List<RequestLimitConfig>>(json);
+            Config config = JsonConvert.DeserializeObject<Config>(json);
+            List<RequestLimitConfig> requestLimitConfigs = config.RateLimits;
             return requestLimitConfigs;
         }
 

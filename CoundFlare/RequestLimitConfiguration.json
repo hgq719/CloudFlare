@@ -1,23 +1,29 @@
-﻿[
-  {
-    "Id": 1,
-    "URL": "livechathandler3.ashx",
-    "Interval": 1,
-    "LimitTimes": 1,
-    "Remark": ""
-  },
-  {
-    "Id": 2,
-    "URL": "chatWindow.aspx",
-    "Interval": 1,
-    "LimitTimes": 1,
-    "Remark": ""
-  },
-  {
-    "Id": 3,
-    "URL": "visitor.ashx",
-    "Interval": 1,
-    "LimitTimes": 1,
-    "Remark": ""
-  }
-]
+﻿{
+  "TriggerRatio": 2, //达到某条规则N倍时候触发ratelimit，认为是攻击
+  "TriggerCreateNumber": 3, //同时有N个IP达到触发某条规则时候开启本条规则或者创建
+  "TriggerDeleteTime": 3, //在N小时内某条规则没有被触发则将本条规则删除，删除时候需要校验，只有在本地配置=cloudflare一致时候才删除
+  "RateLimits": [
+    {
+      "Id": 1,
+      "URL": "livechathandler3.ashx",
+      "Interval": 1,
+      "LimitTimes": 1,
+      "Remark": ""
+    },
+    {
+      "Id": 2,
+      "URL": "chatWindow.aspx",
+      "Interval": 1,
+      "LimitTimes": 1,
+      "Remark": ""
+    },
+    {
+      "Id": 3,
+      "URL": "visitor.ashx",
+      "Interval": 1,
+      "LimitTimes": 1,
+      "Remark": ""
+    }
+  ]
+}
+

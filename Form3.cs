@@ -123,6 +123,7 @@ namespace CoundFlareTools
                             dataGridView1.Columns[1].Width = 175;                  
                             dataGridView1.Columns[2].Width = 500;
                             dataGridView1.Refresh();
+                            labelTotal.Text = string.Format("total:{0}", order.Count());
                         }));
                     }
                     else
@@ -286,6 +287,7 @@ namespace CoundFlareTools
             dataGridView1.Columns[1].Width = 175;
             dataGridView1.Columns[2].Width = 500;
             dataGridView1.Refresh();
+            labelTotal.Text = string.Format("total:{0}", order.Count());
         }
 
         private void button3_Click_1(object sender, EventArgs e)
@@ -318,6 +320,11 @@ namespace CoundFlareTools
                 cloudflareLogHandleSercie.WhitelistIps(ips, comment);
                 MessageBox.Show("Ban Success");
             }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ExcelHelperByNPOI.ExportToExcel(dataGridView1);
         }
     }
 }

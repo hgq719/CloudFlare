@@ -179,5 +179,15 @@ namespace CoundFlareTools
         {
             var xx = requestlimitconfigAppService.GetAll();
         }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            //var xx = logsController.GetRequestLimitConfigs();
+            int Count = 1;
+
+            bool xx = (1 / (float)120) >= (5 / (float)60);
+            float x = (1 / (float)120);
+            float y = (5 / (float)60);
+        }
     }
 }

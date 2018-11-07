@@ -24,7 +24,7 @@ namespace CoundFlareTools
             Application.SetCompatibleTextRenderingDefault(false);
             AbpBootStrapper();
             SetDataDirectory();
-            Form1 frm = bootstrapper.IocManager.Resolve<Form1>();
+            Form3 frm = bootstrapper.IocManager.Resolve<Form3>();
             Application.Run(frm);
         }
 

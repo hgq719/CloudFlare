@@ -129,7 +129,7 @@ namespace CoundFlareTools.CoundFlare
                 var result = (from item in itemsManyGroup
                               from config in requestLimitConfigs
                               where item.ClientRequestURI.ToLower().Contains( config.Url.ToLower() )
-                                    && ( ( item.Count / ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes / config.Interval) )
+                                    && ( ( item.Count /(float) ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes /(float) config.Interval) )
                               select item).OrderByDescending(a=>a.Count).ToList();
 
                 foreach(var item in result)
