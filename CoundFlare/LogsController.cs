@@ -193,7 +193,7 @@ namespace CoundFlareTools.CoundFlare
                         {
                             id = Convert.ToString(reader["id"]),
                             notes = Convert.ToString(reader["notes"]),
-                            mode = Convert.ToString(reader["mode"]),
+                            mode =(EnumMode)Enum.Parse(typeof(EnumMode), Convert.ToString(reader["mode"] )),
                             configurationTarget = Convert.ToString(reader["configurationTarget"]),
                             configurationValue = Convert.ToString(reader["configurationValue"]),
                             createTime = Convert.ToDateTime(reader["createTime"]),
@@ -586,7 +586,8 @@ namespace CoundFlareTools.CoundFlare
         public List<RequestLimitConfig> GetRequestLimitConfigs()
         {
             string json = Utils.GetFileContext("CoundFlare/RequestLimitConfiguration.json");
-            List<RequestLimitConfig> requestLimitConfigs = JsonConvert.DeserializeObject<List<RequestLimitConfig>>(json);
+            Config config = JsonConvert.DeserializeObject<Config>(json);
+            List<RequestLimitConfig> requestLimitConfigs = config.RateLimits;
             return requestLimitConfigs;
         }
 

@@ -18,4 +18,13 @@ namespace CoundFlareTools.CoundFlare
 
         public string Remark { get; set; }
     }
+    public class Config
+    {
+        public int TriggerRatio { get; set; }
+        public int TriggerCreateNumber { get; set; }
+        public int TriggerDeleteTime { get; set; }
+
+        public List<RequestLimitConfig> RateLimits { get; set; }
+
+    }
 }

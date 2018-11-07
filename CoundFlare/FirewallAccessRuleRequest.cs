@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +13,8 @@ namespace CoundFlareTools.CoundFlare
         /// <summary>
         /// valid values: block, challenge, whitelist, js_challenge
         /// </summary>
-        public string mode { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public EnumMode mode { get; set; }
         public Configuration configuration { get; set; }
         public string notes { get; set; }
     }
@@ -52,7 +55,8 @@ namespace CoundFlareTools.CoundFlare
         public string id { get; set; }
         public string notes { get; set; }
         public string[] allowed_modes { get; set; }
-        public string mode { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public EnumMode mode { get; set; }
         public Configuration configuration { get; set; }
         public DateTime created_on { get; set; }
         public DateTime modified_on { get; set; }

@@ -30,7 +30,8 @@ namespace CoundFlareTools.CoundFlare
         /// 禁止Ip
         /// </summary>
         /// <param name="ips"></param>
-        void BanIps(List<string> ips);
+        void BanIps(List<string> ips, string comment);
+        void WhitelistIps(List<string> ips, string comment);
     }
     public class CloudflareLogHandleSercie : NotificationService, ICloudflareLogHandleSercie
     {
@@ -128,7 +129,7 @@ namespace CoundFlareTools.CoundFlare
                 var result = (from item in itemsManyGroup
                               from config in requestLimitConfigs
                               where item.ClientRequestURI.ToLower().Contains( config.Url.ToLower() )
-                                    && ( ( item.Count / ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes / config.Interval) )
+                                    && ( ( item.Count /(float) ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes /(float) config.Interval) )
                               select item).OrderByDescending(a=>a.Count).ToList();
 
                 foreach(var item in result)
@@ -306,10 +307,11 @@ namespace CoundFlareTools.CoundFlare
         /// 禁止Ip
         /// </summary>
         /// <param name="ips"></param>
-        public void BanIps(List<string> ips)
+        public void BanIps(List<string> ips ,string comment)
         {
             //List<FirewallAccessRule> firewallAccessRuleList = logsController.GetFirewallAccessRuleList();
             List<FirewallAccessRule> firewallAccessRuleList = cloundFlareApiService.GetAccessRuleList("", "Add By Defense System");
+            firewallAccessRuleList = firewallAccessRuleList.Where(a => a.mode == EnumMode.challenge).ToList();
             foreach (string ip in ips)
             {
                 if(!firewallAccessRuleList.Exists(a=>a.configurationValue == ip))
@@ -321,8 +323,49 @@ namespace CoundFlareTools.CoundFlare
                             target = "ip",
                             value = ip,
                         },
-                        mode = "block",
-                        notes = "Add By Defense System",
+                        mode = EnumMode.challenge,
+                        notes = string.Format("{0}({1})", comment, "Add By Defense System"),
+                    });
+
+                    if (firewallAccessRuleResponse.success)
+                    {
+                        logsController.InsertFirewallAccessRule(new List<FirewallAccessRule>() {
+                            new FirewallAccessRule
+                            {
+                                id = firewallAccessRuleResponse.result.id,
+                                notes=firewallAccessRuleResponse.result.notes,
+                                mode=firewallAccessRuleResponse.result.mode,
+                                configurationTarget=firewallAccessRuleResponse.result.configuration.target,
+                                configurationValue=firewallAccessRuleResponse.result.configuration.value,
+                                createTime=firewallAccessRuleResponse.result.created_on,
+                                modifiedTime=firewallAccessRuleResponse.result.modified_on,
+                                scopeId=firewallAccessRuleResponse.result.scope.id,
+                                scopeEmail=firewallAccessRuleResponse.result.scope.email,
+                                scopeType=firewallAccessRuleResponse.result.scope.type,
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        public void WhitelistIps(List<string> ips, string comment)
+        {
+            //List<FirewallAccessRule> firewallAccessRuleList = logsController.GetFirewallAccessRuleList();
+            List<FirewallAccessRule> firewallAccessRuleList = cloundFlareApiService.GetAccessRuleList("", "Add By Defense System");
+            firewallAccessRuleList = firewallAccessRuleList.Where(a => a.mode == EnumMode.whitelist).ToList();
+            foreach (string ip in ips)
+            {
+                if (!firewallAccessRuleList.Exists(a => a.configurationValue == ip))
+                {
+                    FirewallAccessRuleResponse firewallAccessRuleResponse = cloundFlareApiService.CreateAccessRule(new FirewallAccessRuleRequest
+                    {
+                        configuration = new Configuration
+                        {
+                            target = "ip",
+                            value = ip,
+                        },
+                        mode = EnumMode.whitelist,
+                        notes = string.Format("{0}({1})", comment, "Add By Defense System"),
                     });
 
                     if (firewallAccessRuleResponse.success)

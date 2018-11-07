@@ -1,4 +1,5 @@
-﻿using CoundFlareTools.CoundFlare;
+﻿using CoundFlareTools.Core;
+using CoundFlareTools.CoundFlare;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace CoundFlareTools
 
         public ICloundFlareApiService cloundFlareApiService { get; set; }
         public ILogsController logsController { get; set; }
+        public IRequestlimitconfigAppService requestlimitconfigAppService { get; set; }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -122,16 +124,17 @@ namespace CoundFlareTools
 
         private void button3_Click(object sender, EventArgs e)
         {//3bc0d0634b944c499fcd764f64f0710a
-            //var x = cloundFlareApiService.CreateAccessRule(new FirewallAccessRuleRequest {
-            //    configuration=new Configuration
-            //    {
-            //        target="ip",
-            //        value="0.0.0.0",
-            //    },
-            //    mode= "block",
-            //    notes= "Add By Defense System",
-            //});
-            var xx = cloundFlareApiService.GetAccessRuleList("222222", "a");
+            var x = cloundFlareApiService.CreateAccessRule(new FirewallAccessRuleRequest
+            {
+                configuration = new Configuration
+                {
+                    target = "ip",
+                    value = "0.0.0.0",
+                },
+                mode = EnumMode.challenge,
+                notes = "Add By Defense System",
+            });
+            var xx = cloundFlareApiService.GetAccessRuleList("1", "Add By Defense System");
             var y = cloundFlareApiService.DeleteAccessRule("3bc0d0634b944c499fcd764f64f0710a");
         }
 
@@ -142,7 +145,7 @@ namespace CoundFlareTools
                 new FirewallAccessRule{
                     id = "xxx",
                     notes="xxx",
-                    mode="block",
+                    mode=EnumMode.block,
                     configurationTarget="ip",
                     configurationValue="0.0.0.0",
                     createTime=DateTime.Now,
@@ -153,6 +156,38 @@ namespace CoundFlareTools
                 }
             });
             var xx = logsController.GetFirewallAccessRuleList();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("start？", "warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (dialogResult == DialogResult.Yes)
+            {
+             
+            }
+
+            Form4 frm = new Form4();
+            frm.ShowDialog();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var xx = cloundFlareApiService.GetRateLimitRuleList();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            var xx = requestlimitconfigAppService.GetAll();
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            //var xx = logsController.GetRequestLimitConfigs();
+            int Count = 1;
+
+            bool xx = (1 / (float)120) >= (5 / (float)60);
+            float x = (1 / (float)120);
+            float y = (5 / (float)60);
         }
     }
 }
