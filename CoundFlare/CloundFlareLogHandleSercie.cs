@@ -1,4 +1,6 @@
 ﻿using Castle.Core.Logging;
+using CoundFlareTools.Core;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -37,7 +39,7 @@ namespace CoundFlareTools.CoundFlare
     {
         private ConcurrentBag<CloudflareLogReport> cloudflareLogReports;
         private ConcurrentQueue<KeyValuePair<DateTime, DateTime>> keyValuePairs;
-        private List<RequestLimitConfig> requestLimitConfigs;
+        private Config roteLimitConfig;
         private ILogger logger = Abp.Logging.LogHelper.Logger;
         private double sample = 0.01;
         private int timeSpan = 5;
@@ -46,12 +48,22 @@ namespace CoundFlareTools.CoundFlare
         private int taskCount = 1;
         private bool resultSaveDb = false;
 
+        public ITriggerlogsAppService triggerlogsAppService { get; set; }
+        public ITriggerlogdetailsAppService triggerlogdetailsAppService { get; set; }
+        public ISettingsAppService settingsAppService { get; set; }
+
         public CloudflareLogHandleSercie()
         {
-            timeSpan = Convert.ToInt32(ConfigurationManager.AppSettings["timeSpan"]);
-            sample = Convert.ToDouble(ConfigurationManager.AppSettings["sample"]);
-            taskCount = Convert.ToInt32(ConfigurationManager.AppSettings["taskCount"]);
-            resultSaveDb = Convert.ToBoolean(ConfigurationManager.AppSettings["resultSaveDb"]);
+            //timeSpan = Convert.ToInt32(ConfigurationManager.AppSettings["timeSpan"]);
+            //sample = Convert.ToDouble(ConfigurationManager.AppSettings["sample"]);
+            //taskCount = Convert.ToInt32(ConfigurationManager.AppSettings["taskCount"]);
+            //resultSaveDb = Convert.ToBoolean(ConfigurationManager.AppSettings["resultSaveDb"]);
+
+            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+            timeSpan = Convert.ToInt32(settings["timeSpan"]);
+            sample = Convert.ToDouble(settings["sample"]);
+            taskCount = Convert.ToInt32(settings["taskCount"]);
+            resultSaveDb = Convert.ToBoolean(settings["resultSaveDb"]);
         }
 
         public ICloundFlareApiService cloundFlareApiService { get; set; }
@@ -93,7 +105,7 @@ namespace CoundFlareTools.CoundFlare
             }
             OnMessage(new MessageEventArgs("产生队列数据结束"));
 
-            requestLimitConfigs = logsController.GetRequestLimitConfigs();
+            roteLimitConfig = logsController.GetLimitConfig();
             this.startTime = startTime;
             this.endTime = endTime;
         }
@@ -118,43 +130,188 @@ namespace CoundFlareTools.CoundFlare
 
                 //合并处理
                 var itemsManyGroup = cloudflareLogReportItemsMany.GroupBy(a => new { a.ClientIP, a.ClientRequestHost, a.ClientRequestURI })
-                    .Select(g => new { g.Key.ClientRequestHost, g.Key.ClientIP, g.Key.ClientRequestURI, Ban=false, Count = g.Sum(c => c.Count) }).OrderByDescending(a=>a.Count).ToList();
-                
+                    .Select(g => new { g.Key.ClientRequestHost, g.Key.ClientIP, g.Key.ClientRequestURI, Ban = false, Count = g.Sum(c => c.Count) }).OrderByDescending(a => a.Count).ToList();
+
                 List<IpNeedToBan> ipNeedToBans = new List<IpNeedToBan>();
 
-                List<IpNeedToBan> ipNeedToBansHas = logsController.GetIpNeedToBans();                
+                List<IpNeedToBan> ipNeedToBansHas = logsController.GetIpNeedToBans();
 
                 var banItems = new List<CloudflareLogReportItem>();
 
+                // 没有增加 N 校验
+                //var result = (from item in itemsManyGroup
+                //              from config in requestLimitConfigs
+                //              where item.ClientRequestURI.ToLower().Contains( config.Url.ToLower() )
+                //                    && ( ( item.Count /(float) ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes /(float) config.Interval) )
+                //              select item).OrderByDescending(a=>a.Count).ToList();
+
+
+                int triggerRatio = 1;
+
                 var result = (from item in itemsManyGroup
-                              from config in requestLimitConfigs
-                              where item.ClientRequestURI.ToLower().Contains( config.Url.ToLower() )
-                                    && ( ( item.Count /(float) ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes /(float) config.Interval) )
-                              select item).OrderByDescending(a=>a.Count).ToList();
+                              from config in roteLimitConfig.RateLimits
+                              where item.ClientRequestURI.ToLower().Contains(config.Url.ToLower())
+                                    && ((item.Count / (float)((end - start).TotalSeconds * sample)) >= (config.LimitTimes * triggerRatio / (float)config.Interval))
+                              select new { item, config.Id }).OrderByDescending(a => a.item.Count).ToList();
 
-                foreach(var item in result)
-                { 
-                    banItems.Add(new CloudflareLogReportItem
-                    {
-                        ClientRequestHost = item.ClientRequestHost,
-                        ClientIP = item.ClientIP,
-                        ClientRequestURI = item.ClientRequestURI,
-                        Count = item.Count,
-                        Ban = true
-                    });
+                List<int> handleIdList = new List<int>();
 
-                    if (!ipNeedToBansHas.Exists(a => a.IP == item.ClientIP))
+                foreach (var item in result)
+                {
+                    var ban = false;
+
+                    //存储rotelimit的触发log
+                    var roteLimit = roteLimitConfig.RateLimits.FirstOrDefault(a => a.Id == item.Id);
+                    var ipNumber = 0;
+                    var action = "None";//None/Create/Delete
+                    var containRoteLimitList = result.Where(a => a.Id == item.Id).ToList();
+                    ipNumber = containRoteLimitList.Count;
+                    //同时有N个IP达到触发某条规则时候开启本条规则或者创建
+                    if (ipNumber >= roteLimitConfig.TriggerCreateNumber)
                     {
-                        ipNeedToBans.Add(new IpNeedToBan
-                        {
-                            Host = item.ClientRequestHost,
-                            IP = item.ClientIP,
-                            RelatedURL = item.ClientRequestURI,
-                            HasBanned = false,
-                            RequestedTime = DateTime.Now,
-                            Remark = ""
-                        });
+                        action = "Create";
+                        ban = true;
                     }
+
+                    if (!handleIdList.Contains(item.Id))
+                    {
+                        handleIdList.Add(item.Id);
+
+                        if(action == "Create")
+                        {
+                            //首先找是否已经存在rotelimit
+                            var roteLimitList = cloundFlareApiService.GetRateLimitRuleList();
+                            var rote = roteLimitList.FirstOrDefault(a => a.match.request.url == roteLimit.Url &&
+                                a.period == roteLimit.LimitTimes &&
+                                a.threshold == roteLimit.Interval);
+
+                            if (rote!=null&& !string.IsNullOrEmpty( rote.id))
+                            {
+                                //已经存在的rote 如果是 disable = false 则开启 否则不用处理
+                                if (!rote.disabled)
+                                {
+                                    rote.disabled = true;
+                                    cloundFlareApiService.UpdateRateLimit(rote);
+                                }
+                            }
+                            else
+                            {
+                                //    {
+                                //  "id": "efc79e757a5d449aa8fb43820ce30347",
+                                //  "disabled": false,
+                                //  "description": "chatserver.comm100.com/chatwindowembedded.aspx",
+                                //  "match": {
+                                //    "request": {
+                                //      "methods": [
+                                //        "_ALL_"
+                                //      ],
+                                //      "schemes": [
+                                //        "_ALL_"
+                                //      ],
+                                //      "url": "chatserver.comm100.com/chatwindowembedded.aspx"
+                                //    },
+                                //    "response": {
+                                //      "origin_traffic": true,
+                                //      "headers": [
+                                //        {
+                                //          "name": "Cf-Cache-Status",
+                                //          "op": "ne",
+                                //          "value": "HIT"
+                                //        }
+                                //      ]
+                                //    }
+                                //  },
+                                //  "login_protect": false,
+                                //  "threshold": 2,
+                                //  "period": 60,
+                                //  "action": {
+                                //    "mode": "challenge",
+                                //    "timeout": 0
+                                //  }
+                                //}
+                                cloundFlareApiService.CreateRateLimit(new RateLimitRule
+                                {
+                                    disabled = true,
+                                    description= roteLimit.Url,
+                                    match=new Match
+                                    {
+                                        request=new Request
+                                        {
+                                            methods=new string[] { "_ALL_" },
+                                            schemes= new string[] { "_ALL_" },
+                                            url= roteLimit.Url,
+                                        },
+                                        response=new Response
+                                        {
+                                            origin_traffic=true,
+                                            headers=new Header[] {
+                                                new Header{
+                                                   name="Cf-Cache-Status",
+                                                   op="ne",
+                                                   value="HIT",
+                                                }
+                                            }
+                                        }
+                                    },
+                                    login_protect=false,
+                                    threshold= roteLimit.Interval,
+                                    period = roteLimit.LimitTimes,
+                                    action=new RateLimitAction
+                                    {
+                                        mode = "challenge",
+                                        timeout = 0
+                                    }
+                                });
+                            }
+                        }
+
+                        TriggerlogsDto triggerlogsDto = triggerlogsAppService.Create(new TriggerlogsDto
+                        {
+                            RequestLimitConfigId = item.Id,
+                            RequestLimitConfigDetail = JsonConvert.SerializeObject(new
+                            {
+                                roteLimit,
+                                roteLimitConfig.TriggerRatio,
+                                roteLimitConfig.TriggerCreateNumber,
+                                roteLimitConfig.TriggerDeleteTime,
+                            }),
+                            IpNumber = ipNumber,
+                            TriggerTime = DateTime.Now,
+                            Action = action,
+                            Remark = "Add By Defense System",
+                        });
+                        foreach (var itm in containRoteLimitList)
+                        {
+                            triggerlogdetailsAppService.Create(new TriggerlogdetailsDto
+                            {
+                                TriggerLogId = triggerlogsDto.Id,
+                                StartTime = startTime,
+                                EndTime = endTime,
+                                Size = size,
+                                Sample = sample,
+                                ClientIP = item.item.ClientIP,
+                                ClientRequestHost = item.item.ClientRequestHost,
+                                ClientRequestURI = item.item.ClientRequestURI,
+                                Count = item.item.Count,
+
+                            });
+                        }
+                    }
+
+                    if(!banItems.Exists(a=>a.ClientIP == item.item.ClientIP
+                    && a.ClientRequestHost == item.item.ClientRequestHost
+                    && a.ClientRequestURI == item.item.ClientRequestURI))
+                    {
+                        banItems.Add(new CloudflareLogReportItem
+                        {
+                            ClientRequestHost = item.item.ClientRequestHost,
+                            ClientIP = item.item.ClientIP,
+                            ClientRequestURI = item.item.ClientRequestURI,
+                            Count = item.item.Count,
+                            Ban = ban
+                        });
+                    }                   
+
                 }
 
                 if (resultSaveDb == true)
@@ -219,22 +376,33 @@ namespace CoundFlareTools.CoundFlare
 
                         stopwatch.Restart();
 
-                        var result = cloudflareLogs.GroupBy(a => new { a.ClientRequestHost, a.ClientIP, a.ClientRequestURI });
+                        var result = cloudflareLogs.GroupBy(a => new { a.ClientRequestHost, a.ClientIP, a.ClientRequestURI }).
+                            Select( g => new { g.Key.ClientRequestHost, g.Key.ClientIP, g.Key.ClientRequestURI, Count= g.Count() });
 
                         List<CloudflareLogReportItem> CloudflareLogReportItemList = new List<CloudflareLogReportItem>();
                         foreach (var group in result)
                         {
-                            requestLimitConfigs.ForEach(c => {
-                                CloudflareLogReportItemList.Add(new CloudflareLogReportItem
-                                {
-                                    ClientRequestHost = group.Key.ClientRequestHost,
-                                    ClientIP = group.Key.ClientIP,
-                                    //ClientRequestURI = c.Url,
-                                    ClientRequestURI = group.Key.ClientRequestURI,
-                                    Count = group.Count(a => a.ClientRequestURI.ToLower().Contains(c.Url.ToLower()))
-                                });
+                            CloudflareLogReportItemList.Add(new CloudflareLogReportItem
+                            {
+                                ClientRequestHost = group.ClientRequestHost,
+                                ClientIP = group.ClientIP,
+                                ClientRequestURI = group.ClientRequestURI,
+                                Count = group.Count
                             });
                         }
+                        //foreach (var group in result)
+                        //{
+                        //    roteLimitConfig.RateLimits.ForEach(c => {
+                        //        CloudflareLogReportItemList.Add(new CloudflareLogReportItem
+                        //        {
+                        //            ClientRequestHost = group.Key.ClientRequestHost,
+                        //            ClientIP = group.Key.ClientIP,
+                        //            //ClientRequestURI = c.Url,
+                        //            ClientRequestURI = group.Key.ClientRequestURI,
+                        //            Count = group.Count(a => a.ClientRequestURI.ToLower().Contains(c.Url.ToLower()))
+                        //        });
+                        //    });
+                        //}
 
                         CloudflareLogReport CloudflareLogReport = new CloudflareLogReport
                         {

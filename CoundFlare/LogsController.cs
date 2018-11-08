@@ -11,6 +11,7 @@ using System.Data.SqlClient;
 using System.Text;
 using System.Configuration;
 using Castle.Core.Logging;
+using CoundFlareTools.Core;
 
 namespace CoundFlareTools.CoundFlare
 {
@@ -25,6 +26,7 @@ namespace CoundFlareTools.CoundFlare
         void InsertFirewallAccessRule(List<FirewallAccessRule> firewallAccessRuleList);
         void DeleteFirewallAccessRule(string id);
         List<FirewallAccessRule> GetFirewallAccessRuleList();
+        Config GetLimitConfig();
     }
 
     public class LogsController : ILogsController
@@ -208,6 +210,10 @@ namespace CoundFlareTools.CoundFlare
                 conn.Close();
             }
             return firewallAccessRules;
+        }
+        public Config GetLimitConfig()
+        {
+            return null;
         }
         private void InsertRow(CloudflareLog log, DataTable table)
         {
@@ -590,6 +596,12 @@ namespace CoundFlareTools.CoundFlare
             List<RequestLimitConfig> requestLimitConfigs = config.RateLimits;
             return requestLimitConfigs;
         }
+        public Config GetLimitConfig()
+        {
+            string json = Utils.GetFileContext("CoundFlare/RequestLimitConfiguration.json");
+            Config config = JsonConvert.DeserializeObject<Config>(json);
+            return config;
+        }
 
         public void InsertData(DateTime startTime, List<CloudflareLog> CloudflareLogs)
         {
@@ -614,6 +626,80 @@ namespace CoundFlareTools.CoundFlare
         public void InsertResultDataBulk(List<IpNeedToBan> ipNeedToBans)
         {
             //throw new NotImplementedException();
+        }
+    }
+    public class LogsControllerImpBySqlLite : ILogsController
+    {
+        public ISettingsAppService settingsAppService { get; set; }
+        public IRequestlimitconfigAppService requestlimitconfigAppService { get; set; }
+
+        public void DeleteFirewallAccessRule(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<FirewallAccessRule> GetFirewallAccessRuleList()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<IpNeedToBan> GetIpNeedToBans()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Config GetLimitConfig()
+        {
+            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+            List<RequestLimitConfig> rateLimitList = new List<RequestLimitConfig>();
+            var data = requestlimitconfigAppService.GetAll().Where(a => a.Status).ToList();
+            foreach(var item in data)
+            {
+                rateLimitList.Add(new RequestLimitConfig {
+                    Id = item.Id,
+                    Interval= item.Interval.Value,
+                    LimitTimes=item.LimitTimes.Value,
+                    Remark= item.Remark,
+                    Url= item.Url,
+                });
+            }
+            Config config = new Config {
+                TriggerRatio=Convert.ToInt32(settings["TriggerRatio"]),
+                TriggerCreateNumber= Convert.ToInt32(settings["TriggerCreateNumber"]),
+                TriggerDeleteTime= Convert.ToInt32(settings["TriggerDeleteTime"]),
+                RateLimits= rateLimitList,
+            };
+            return config;
+        }
+
+        public List<RequestLimitConfig> GetRequestLimitConfigs()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertData(DateTime startTime, List<CloudflareLog> CloudflareLogs)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertFirewallAccessRule(List<FirewallAccessRule> firewallAccessRuleList)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertIntoIpNeedToBanTable(IpNeedToBan ipNeedToBan)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertResultData(List<IpNeedToBan> ipNeedToBans)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertResultDataBulk(List<IpNeedToBan> ipNeedToBans)
+        {
+            throw new NotImplementedException();
         }
     }
 }

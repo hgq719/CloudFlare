@@ -229,13 +229,37 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoMappingConfig.cs" />
+    <Compile Include="Core\Application\Dto\ActionsDto.cs" />
     <Compile Include="Core\Application\Dto\RequestlimitconfigDto.cs" />
+    <Compile Include="Core\Application\Dto\SettingsDto.cs" />
+    <Compile Include="Core\Application\Dto\TriggerlogdetailsDto.cs" />
+    <Compile Include="Core\Application\Dto\TriggerlogsDto.cs" />
+    <Compile Include="Core\Application\Service\ActionsAppService.cs" />
     <Compile Include="Core\Application\Service\RequestlimitconfigAppService.cs" />
+    <Compile Include="Core\Application\Service\SettingsAppService.cs" />
+    <Compile Include="Core\Application\Service\TriggerlogdetailsAppService.cs" />
+    <Compile Include="Core\Application\Service\TriggerlogsAppService.cs" />
+    <Compile Include="Core\Domain\Model\Actions.cs" />
     <Compile Include="Core\Domain\Model\Requestlimitconfig.cs" />
+    <Compile Include="Core\Domain\Model\Settings.cs" />
+    <Compile Include="Core\Domain\Model\Triggerlogdetails.cs" />
+    <Compile Include="Core\Domain\Model\Triggerlogs.cs" />
+    <Compile Include="Core\Domain\Repository.Interfaces\IActionsRepository.cs" />
     <Compile Include="Core\Domain\Repository.Interfaces\IRequestlimitconfigRepository.cs" />
+    <Compile Include="Core\Domain\Repository.Interfaces\ISettingsRepository.cs" />
+    <Compile Include="Core\Domain\Repository.Interfaces\ITriggerlogdetailsRepository.cs" />
+    <Compile Include="Core\Domain\Repository.Interfaces\ITriggerlogsRepository.cs" />
+    <Compile Include="Core\Infrastructure\Mapper\ActionsMapper.cs" />
     <Compile Include="Core\Infrastructure\Mapper\RequestlimitconfigMapper.cs" />
+    <Compile Include="Core\Infrastructure\Mapper\SettingsMapper.cs" />
+    <Compile Include="Core\Infrastructure\Mapper\TriggerlogdetailsMapper.cs" />
+    <Compile Include="Core\Infrastructure\Mapper\TriggerlogsMapper.cs" />
     <Compile Include="Core\Infrastructure\NHibernate\CloudflareDbSessionConfiguration.cs" />
+    <Compile Include="Core\Infrastructure\Repository\ActionsRepository.cs" />
     <Compile Include="Core\Infrastructure\Repository\RequestlimitconfigRepository.cs" />
+    <Compile Include="Core\Infrastructure\Repository\SettingsRepository.cs" />
+    <Compile Include="Core\Infrastructure\Repository\TriggerlogdetailsRepository.cs" />
+    <Compile Include="Core\Infrastructure\Repository\TriggerlogsRepository.cs" />
     <Compile Include="CoundFlare\CloudflareLog.cs" />
     <Compile Include="CoundFlare\CloundFlareApiService.cs" />
     <Compile Include="CoundFlare\CloundFlareLogHandleSercie.cs" />
@@ -272,6 +296,24 @@
     <Compile Include="Form4.Designer.cs">
       <DependentUpon>Form4.cs</DependentUpon>
     </Compile>
+    <Compile Include="Form5.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form5.Designer.cs">
+      <DependentUpon>Form5.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form6.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form6.Designer.cs">
+      <DependentUpon>Form6.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form7.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form7.Designer.cs">
+      <DependentUpon>Form7.cs</DependentUpon>
+    </Compile>
     <Compile Include="NotificationService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -289,6 +331,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form4.resx">
       <DependentUpon>Form4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form5.resx">
+      <DependentUpon>Form5.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form6.resx">
+      <DependentUpon>Form6.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form7.resx">
+      <DependentUpon>Form7.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

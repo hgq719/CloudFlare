@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Castle.Core.Logging;
+using CoundFlareTools.Core;
 using CoundFlareTools.CoundFlare;
 using Newtonsoft.Json;
 using System;
@@ -23,9 +24,12 @@ namespace CoundFlareTools
         }
 
         public Form2 form2 { get; set; }
+        public Form5 form5 { get; set; }
 
         ILogger logger = Abp.Logging.LogHelper.Logger;
         public ICloudflareLogHandleSercie cloudflareLogHandleSercie { get; set; }
+        public ISettingsAppService settingsAppService { get; set; }
+
         private bool autoRun = false;
         private bool autoBan = false;
         private bool showAutoRunCheckBox = false;
@@ -35,10 +39,12 @@ namespace CoundFlareTools
 
         private void Form3_Load(object sender, EventArgs e)
         {
+            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+
             cloudflareLogHandleSercie.SubscribeMessageEvent(Notification_Message);
-            showAutoBanCheckBox = Convert.ToBoolean(ConfigurationManager.AppSettings["showAutoBanCheckBox"]);
-            showUnbanButton = Convert.ToBoolean(ConfigurationManager.AppSettings["showUnbanButton"]);
-            showWhitelistButton = Convert.ToBoolean(ConfigurationManager.AppSettings["showWhitelistButton"]);
+            showAutoBanCheckBox = Convert.ToBoolean(settings["showAutoBanCheckBox"]);
+            showUnbanButton = Convert.ToBoolean(settings["showUnbanButton"]);
+            showWhitelistButton = Convert.ToBoolean(settings["showWhitelistButton"]);
 
             this.checkBoxAutoRun.Visible = showAutoRunCheckBox;
             this.checkBoxAutoBan.Visible = showAutoBanCheckBox;
@@ -330,6 +336,11 @@ namespace CoundFlareTools
         private void button4_Click(object sender, EventArgs e)
         {
             ExcelHelperByNPOI.ExportToExcel(dataGridView1);
+        }
+
+        private void button3_Click_2(object sender, EventArgs e)
+        {
+            form5.ShowDialog();
         }
     }
 }

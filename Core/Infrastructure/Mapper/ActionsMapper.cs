@@ -8,23 +8,22 @@ using System.Threading.Tasks;
 
 namespace CoundFlareTools.Core
 {
-    public class RequestlimitconfigMapper : ClassMap<Requestlimitconfig>
+    public class ActionsMapper : ClassMap<Actions>
     {
-        public RequestlimitconfigMapper()
+        public ActionsMapper()
         {
             // 禁用惰性加载
             Not.LazyLoad();
             // 映射到表tweet
-            Table("t_Cloudflare_RequestLimitConfig");
+            Table("t_Cloudflare_Actions");
             // 主键映射
             Id(x => x.Id).Column("Id");
             // 字段映射
-            Map(x => x.Url).Column("Url");
-            Map(x => x.Interval).Column("Interval");
-            Map(x => x.LimitTimes).Column("LimitTimes");
+            Map(x => x.TriggerLogId).Column("TriggerLogId");
+            Map(x => x.ClientIP).Column("ClientIP");
+            Map(x => x.ActionTime).Column("ActionTime");
+            Map(x => x.Mode).Column("Mode");
             Map(x => x.Remark).Column("Remark");
-            Map(x => x.CreateTime).Column("CreateTime");
-            Map(x => x.Status).Column("Status");
         }
     }
 }

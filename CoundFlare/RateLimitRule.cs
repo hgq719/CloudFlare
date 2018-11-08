@@ -13,6 +13,7 @@ namespace CoundFlareTools.CoundFlare
         public string description { get; set; }
         public Match match { get; set; }
         public Bypass[] bypass { get; set; }
+        public bool login_protect { get; set; }
         public int threshold { get; set; }
         public int period { get; set; }
         public RateLimitAction action { get; set; }
@@ -46,6 +47,7 @@ namespace CoundFlareTools.CoundFlare
     }
     public class Response
     {
+        public bool origin_traffic { get; set; }
         public int[] status { get; set; }
         public Header[] headers { get; set; }
     }
