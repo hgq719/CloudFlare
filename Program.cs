@@ -2,16 +2,13 @@
 using Abp.Castle.Logging.Log4Net;
 using Castle.Facilities.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CoundFlareTools
 {
     static class Program
     {
-        static AbpBootstrapper bootstrapper;
+        static AbpBootstrapper _bootstrapper;
 
         /// <summary>
         /// 应用程序的主入口点。
@@ -24,27 +21,24 @@ namespace CoundFlareTools
             Application.SetCompatibleTextRenderingDefault(false);
             AbpBootStrapper();
             SetDataDirectory();
-            Form3 frm = bootstrapper.IocManager.Resolve<Form3>();
+            var frm = _bootstrapper.IocManager.Resolve<Form3>();
             Application.Run(frm);
         }
 
         static void AbpBootStrapper()
         {
-            bootstrapper = AbpBootstrapper.Create<CoundFlareModule>();
-            bootstrapper.IocManager.IocContainer
+            _bootstrapper = AbpBootstrapper.Create<CoundFlareModule>();
+            _bootstrapper.IocManager.IocContainer
                 .AddFacility<LoggingFacility>(f => f.UseAbpLog4Net()
                     .WithConfig("log4net.config")
                 );
-            bootstrapper.Initialize();
+            _bootstrapper.Initialize();
         }
         static void SetDataDirectory()
         {
-            string dataDir = AppDomain.CurrentDomain.BaseDirectory;
-            //dataDir = dataDir.Remove(dataDir.IndexOf(@"\bin\"));
-            dataDir =  string.Format("{0}{1}", dataDir, "CoundFlare");
+            var dataDir = AppDomain.CurrentDomain.BaseDirectory;
+            dataDir = $"{dataDir}CoundFlare";
             AppDomain.CurrentDomain.SetData("DataDirectory", dataDir);
-
-            var xx = AppDomain.CurrentDomain.GetData("DataDirectory");
         }
     }
 }
