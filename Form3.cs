@@ -31,6 +31,7 @@ namespace CoundFlareTools
         public ICloudflareLogHandleSercie cloudflareLogHandleSercie { get; set; }
         public ISettingsAppService settingsAppService { get; set; }
         public List<CloudflareLog> CloudflareLogs { get; set; }
+        public ILogsController logsController { get; set; }
 
         private bool autoRun = false;
         private bool autoBan = false;
@@ -38,20 +39,23 @@ namespace CoundFlareTools
         private bool showAutoBanCheckBox = false;
         private bool showUnbanButton = false;
         private bool showWhitelistButton = false;
+        private bool showSettingsButton = false;
 
         private void Form3_Load(object sender, EventArgs e)
         {
-            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
-
+            // var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+            var settings = logsController.GetSettings();
             cloudflareLogHandleSercie.SubscribeMessageEvent(Notification_Message);
             showAutoBanCheckBox = Convert.ToBoolean(settings["showAutoBanCheckBox"]);
             showUnbanButton = Convert.ToBoolean(settings["showUnbanButton"]);
             showWhitelistButton = Convert.ToBoolean(settings["showWhitelistButton"]);
+            showSettingsButton = Convert.ToBoolean(settings["showSettingsButton"]);
 
             this.checkBoxAutoRun.Visible = showAutoRunCheckBox;
             this.checkBoxAutoBan.Visible = showAutoBanCheckBox;
             this.buttonUnban.Visible = showUnbanButton;
             this.buttonWhitelist.Visible = showWhitelistButton;
+            this.buttonSetting.Visible = showSettingsButton;
 
             //CloudflareLogReport cloudflareLogReport = new CloudflareLogReport {
             //     CloudflareLogReportItems = new CloudflareLogReportItem[] {

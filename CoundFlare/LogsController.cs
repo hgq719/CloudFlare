@@ -28,6 +28,7 @@ namespace CoundFlareTools.CoundFlare
         List<FirewallAccessRule> GetFirewallAccessRuleList();
         Config GetLimitConfig();
         void CreateTriggerlogdetailsDtoBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos);
+        Dictionary<string, string> GetSettings();
     }
 
     public class LogsController : ILogsController
@@ -239,7 +240,10 @@ namespace CoundFlareTools.CoundFlare
             };
             return config;
         }
-
+        public Dictionary<string, string> GetSettings()
+        {
+            return settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value); 
+        }
         public void CreateTriggerlogdetailsDtoBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos)
         {
             var dt = new DataTable();
@@ -690,6 +694,15 @@ namespace CoundFlareTools.CoundFlare
         {
 
         }
+        public Dictionary<string, string> GetSettings()
+        {
+            Dictionary<string, string> settings = new Dictionary<string, string>();
+            foreach(string key in ConfigurationManager.AppSettings.Keys)
+            {
+                settings.Add(key, ConfigurationManager.AppSettings[key]);
+            }
+            return settings;
+        }
     }
     public class LogsControllerImpBySqlLite : ILogsController
     {
@@ -767,6 +780,10 @@ namespace CoundFlareTools.CoundFlare
         public void CreateTriggerlogdetailsDtoBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos)
         {
 
+        }
+        public Dictionary<string, string> GetSettings()
+        {
+            return settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
         }
     }
 }

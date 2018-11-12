@@ -49,7 +49,7 @@
             this.labelTotal = new System.Windows.Forms.Label();
             this.buttonWhitelist = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.buttonSetting = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -249,19 +249,19 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // button3
+            // buttonSetting
             // 
-            this.button3.Location = new System.Drawing.Point(464, 58);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 33;
-            this.button3.Text = "settings";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click_2);
+            this.buttonSetting.Location = new System.Drawing.Point(559, 58);
+            this.buttonSetting.Name = "buttonSetting";
+            this.buttonSetting.Size = new System.Drawing.Size(75, 23);
+            this.buttonSetting.TabIndex = 33;
+            this.buttonSetting.Text = "settings";
+            this.buttonSetting.UseVisualStyleBackColor = true;
+            this.buttonSetting.Click += new System.EventHandler(this.button3_Click_2);
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(545, 58);
+            this.button5.Location = new System.Drawing.Point(464, 58);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(89, 23);
             this.button5.TabIndex = 34;
@@ -275,7 +275,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1188, 723);
             this.Controls.Add(this.button5);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.buttonSetting);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.buttonWhitelist);
             this.Controls.Add(this.labelTotal);
@@ -327,7 +327,7 @@
         private System.Windows.Forms.Label labelTotal;
         private System.Windows.Forms.Button buttonWhitelist;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button buttonSetting;
         private System.Windows.Forms.Button button5;
     }
 }

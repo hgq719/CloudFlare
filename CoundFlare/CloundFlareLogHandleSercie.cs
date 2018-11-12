@@ -72,7 +72,8 @@ namespace CoundFlareTools.CoundFlare
             roteLimitConfig = logsController.GetLimitConfig();
             this.startTime = startTime;
             this.endTime = endTime;
-            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+            //var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+            var settings = logsController.GetSettings();
             timeSpan = Convert.ToInt32(settings["timeSpan"]);
             sample = Convert.ToDouble(settings["sample"]);
             taskCount = Convert.ToInt32(settings["taskCount"]);
