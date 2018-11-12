@@ -34,9 +34,11 @@ namespace CoundFlareTools.CoundFlare
         /// <param name="ips"></param>
         void BanIps(List<string> ips, string comment);
         void WhitelistIps(List<string> ips, string comment);
+        List<CloudflareLog> GetCloudflareLogs();
     }
     public class CloudflareLogHandleSercie : NotificationService, ICloudflareLogHandleSercie
     {
+        private ConcurrentBag<List<CloudflareLog>> concurrentBagCloudflareLogs=new ConcurrentBag<List<CloudflareLog>>();
         private ConcurrentBag<CloudflareLogReport> cloudflareLogReports;
         private ConcurrentQueue<KeyValuePair<DateTime, DateTime>> keyValuePairs;
         private Config roteLimitConfig;
@@ -47,6 +49,7 @@ namespace CoundFlareTools.CoundFlare
         private DateTime endTime;
         private int taskCount = 1;
         private bool resultSaveDb = false;
+        private bool updateRateLimitForCloundflare = false;
 
         public ITriggerlogsAppService triggerlogsAppService { get; set; }
         public ITriggerlogdetailsAppService triggerlogdetailsAppService { get; set; }
@@ -58,12 +61,6 @@ namespace CoundFlareTools.CoundFlare
             //sample = Convert.ToDouble(ConfigurationManager.AppSettings["sample"]);
             //taskCount = Convert.ToInt32(ConfigurationManager.AppSettings["taskCount"]);
             //resultSaveDb = Convert.ToBoolean(ConfigurationManager.AppSettings["resultSaveDb"]);
-
-            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
-            timeSpan = Convert.ToInt32(settings["timeSpan"]);
-            sample = Convert.ToDouble(settings["sample"]);
-            taskCount = Convert.ToInt32(settings["taskCount"]);
-            resultSaveDb = Convert.ToBoolean(settings["resultSaveDb"]);
         }
 
         public ICloundFlareApiService cloundFlareApiService { get; set; }
@@ -72,6 +69,16 @@ namespace CoundFlareTools.CoundFlare
         //产生队列数据
         public void InitQueue(DateTime startTime, DateTime endTime)
         {
+            roteLimitConfig = logsController.GetLimitConfig();
+            this.startTime = startTime;
+            this.endTime = endTime;
+            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+            timeSpan = Convert.ToInt32(settings["timeSpan"]);
+            sample = Convert.ToDouble(settings["sample"]);
+            taskCount = Convert.ToInt32(settings["taskCount"]);
+            resultSaveDb = Convert.ToBoolean(settings["resultSaveDb"]);
+            updateRateLimitForCloundflare=Convert.ToBoolean(settings["UpdateRateLimitForCloundflare"]);
+
             if (keyValuePairs == null)
             {
                 keyValuePairs = new ConcurrentQueue<KeyValuePair<DateTime, DateTime>>();
@@ -104,10 +111,7 @@ namespace CoundFlareTools.CoundFlare
                 }
             }
             OnMessage(new MessageEventArgs("产生队列数据结束"));
-
-            roteLimitConfig = logsController.GetLimitConfig();
-            this.startTime = startTime;
-            this.endTime = endTime;
+            
         }
         //获取实时报表
         public CloudflareLogReport GetCloudflareLogReport()
@@ -145,13 +149,11 @@ namespace CoundFlareTools.CoundFlare
                 //                    && ( ( item.Count /(float) ( (end - start).TotalSeconds * sample ) )  >= (config.LimitTimes /(float) config.Interval) )
                 //              select item).OrderByDescending(a=>a.Count).ToList();
 
-
-                int triggerRatio = 1;
-
+                
                 var result = (from item in itemsManyGroup
                               from config in roteLimitConfig.RateLimits
                               where item.ClientRequestURI.ToLower().Contains(config.Url.ToLower())
-                                    && ((item.Count / (float)((end - start).TotalSeconds * sample)) >= (config.LimitTimes * triggerRatio / (float)config.Interval))
+                                    && ((item.Count / (float)((end - start).TotalSeconds * sample)) >= (config.LimitTimes * roteLimitConfig.TriggerRatio / (float)config.Interval))
                               select new { item, config.Id }).OrderByDescending(a => a.item.Count).ToList();
 
                 List<int> handleIdList = new List<int>();
@@ -177,7 +179,7 @@ namespace CoundFlareTools.CoundFlare
                     {
                         handleIdList.Add(item.Id);
 
-                        if(action == "Create")
+                        if (action == "Create")
                         {
                             //首先找是否已经存在rotelimit
                             var roteLimitList = cloundFlareApiService.GetRateLimitRuleList();
@@ -185,84 +187,88 @@ namespace CoundFlareTools.CoundFlare
                                 a.period == roteLimit.LimitTimes &&
                                 a.threshold == roteLimit.Interval);
 
-                            if (rote!=null&& !string.IsNullOrEmpty( rote.id))
+                            if (updateRateLimitForCloundflare)
                             {
-                                //已经存在的rote 如果是 disable = false 则开启 否则不用处理
-                                if (!rote.disabled)
+                                if (rote != null && !string.IsNullOrEmpty(rote.id))
                                 {
-                                    rote.disabled = true;
-                                    cloundFlareApiService.UpdateRateLimit(rote);
-                                }
-                            }
-                            else
-                            {
-                                //    {
-                                //  "id": "efc79e757a5d449aa8fb43820ce30347",
-                                //  "disabled": false,
-                                //  "description": "chatserver.comm100.com/chatwindowembedded.aspx",
-                                //  "match": {
-                                //    "request": {
-                                //      "methods": [
-                                //        "_ALL_"
-                                //      ],
-                                //      "schemes": [
-                                //        "_ALL_"
-                                //      ],
-                                //      "url": "chatserver.comm100.com/chatwindowembedded.aspx"
-                                //    },
-                                //    "response": {
-                                //      "origin_traffic": true,
-                                //      "headers": [
-                                //        {
-                                //          "name": "Cf-Cache-Status",
-                                //          "op": "ne",
-                                //          "value": "HIT"
-                                //        }
-                                //      ]
-                                //    }
-                                //  },
-                                //  "login_protect": false,
-                                //  "threshold": 2,
-                                //  "period": 60,
-                                //  "action": {
-                                //    "mode": "challenge",
-                                //    "timeout": 0
-                                //  }
-                                //}
-                                cloundFlareApiService.CreateRateLimit(new RateLimitRule
-                                {
-                                    disabled = true,
-                                    description= roteLimit.Url,
-                                    match=new Match
+                                    //已经存在的rote 如果是 disable = false 则开启 否则不用处理
+                                    if (!rote.disabled)
                                     {
-                                        request=new Request
+                                        rote.disabled = true;
+                                        cloundFlareApiService.UpdateRateLimit(rote);
+                                    }
+                                }
+                                else
+                                {
+                                    //    {
+                                    //  "id": "efc79e757a5d449aa8fb43820ce30347",
+                                    //  "disabled": false,
+                                    //  "description": "chatserver.comm100.com/chatwindowembedded.aspx",
+                                    //  "match": {
+                                    //    "request": {
+                                    //      "methods": [
+                                    //        "_ALL_"
+                                    //      ],
+                                    //      "schemes": [
+                                    //        "_ALL_"
+                                    //      ],
+                                    //      "url": "chatserver.comm100.com/chatwindowembedded.aspx"
+                                    //    },
+                                    //    "response": {
+                                    //      "origin_traffic": true,
+                                    //      "headers": [
+                                    //        {
+                                    //          "name": "Cf-Cache-Status",
+                                    //          "op": "ne",
+                                    //          "value": "HIT"
+                                    //        }
+                                    //      ]
+                                    //    }
+                                    //  },
+                                    //  "login_protect": false,
+                                    //  "threshold": 2,
+                                    //  "period": 60,
+                                    //  "action": {
+                                    //    "mode": "challenge",
+                                    //    "timeout": 0
+                                    //  }
+                                    //}
+                                    cloundFlareApiService.CreateRateLimit(new RateLimitRule
+                                    {
+                                        disabled = true,
+                                        description = roteLimit.Url,
+                                        match = new Match
                                         {
-                                            methods=new string[] { "_ALL_" },
-                                            schemes= new string[] { "_ALL_" },
-                                            url= roteLimit.Url,
-                                        },
-                                        response=new Response
-                                        {
-                                            origin_traffic=true,
-                                            headers=new Header[] {
+                                            request = new Request
+                                            {
+                                                methods = new string[] { "_ALL_" },
+                                                schemes = new string[] { "_ALL_" },
+                                                url = roteLimit.Url,
+                                            },
+                                            response = new Response
+                                            {
+                                                origin_traffic = true,
+                                                headers = new Header[] {
                                                 new Header{
                                                    name="Cf-Cache-Status",
                                                    op="ne",
                                                    value="HIT",
                                                 }
                                             }
+                                            }
+                                        },
+                                        login_protect = false,
+                                        threshold = roteLimit.Interval,
+                                        period = roteLimit.LimitTimes,
+                                        action = new RateLimitAction
+                                        {
+                                            mode = "challenge",
+                                            timeout = 0
                                         }
-                                    },
-                                    login_protect=false,
-                                    threshold= roteLimit.Interval,
-                                    period = roteLimit.LimitTimes,
-                                    action=new RateLimitAction
-                                    {
-                                        mode = "challenge",
-                                        timeout = 0
-                                    }
-                                });
+                                    });
+                                }
                             }
+
                         }
 
                         TriggerlogsDto triggerlogsDto = triggerlogsAppService.Create(new TriggerlogsDto
@@ -280,22 +286,29 @@ namespace CoundFlareTools.CoundFlare
                             Action = action,
                             Remark = "Add By Defense System",
                         });
+                        List<TriggerlogdetailsDto> triggerlogdetailsDtos = new List<TriggerlogdetailsDto>();
                         foreach (var itm in containRoteLimitList)
                         {
-                            triggerlogdetailsAppService.Create(new TriggerlogdetailsDto
+                            var dto = new TriggerlogdetailsDto
                             {
                                 TriggerLogId = triggerlogsDto.Id,
-                                StartTime = startTime,
-                                EndTime = endTime,
+                                //StartTime = startTime,
+                                //EndTime = endTime,
                                 Size = size,
                                 Sample = sample,
-                                ClientIP = item.item.ClientIP,
-                                ClientRequestHost = item.item.ClientRequestHost,
-                                ClientRequestURI = item.item.ClientRequestURI,
-                                Count = item.item.Count,
+                                ClientIP = itm.item.ClientIP,
+                                ClientRequestHost = itm.item.ClientRequestHost,
+                                ClientRequestURI = itm.item.ClientRequestURI,
+                                Count = itm.item.Count,
 
-                            });
+                            };
+                            triggerlogdetailsDtos.Add(dto);
+
+                            //triggerlogdetailsAppService.Create(dto);
                         }
+
+                        //triggerlogdetailsAppService.CreateBatch(triggerlogdetailsDtos);
+                        logsController.CreateTriggerlogdetailsDtoBatch(triggerlogdetailsDtos);
                     }
 
                     if(!banItems.Exists(a=>a.ClientIP == item.item.ClientIP
@@ -371,25 +384,35 @@ namespace CoundFlareTools.CoundFlare
                         {                            
                             cloudflareLogs = cloundFlareApiService.GetCloudflareLogs(start, end, out retry);
                         }
+
+                        if (cloudflareLogs!=null&& cloudflareLogs.Count>0)
+                        {
+                            concurrentBagCloudflareLogs.Add(cloudflareLogs);
+                        }
+
                         stopwatch.Stop();
                         OnMessage(new MessageEventArgs("取出数据:" + time+ "共"+ cloudflareLogs.Count+"条,用时:"+ stopwatch.ElapsedMilliseconds / 1000 + "秒"));
 
                         stopwatch.Restart();
 
                         var result = cloudflareLogs.GroupBy(a => new { a.ClientRequestHost, a.ClientIP, a.ClientRequestURI }).
-                            Select( g => new { g.Key.ClientRequestHost, g.Key.ClientIP, g.Key.ClientRequestURI, Count= g.Count() });
+                            Select( g => new CloudflareLogReportItem {
+                                ClientRequestHost = g.Key.ClientRequestHost,
+                                ClientIP = g.Key.ClientIP,
+                                ClientRequestURI = g.Key.ClientRequestURI,
+                                Count = g.Count() });
 
-                        List<CloudflareLogReportItem> CloudflareLogReportItemList = new List<CloudflareLogReportItem>();
-                        foreach (var group in result)
-                        {
-                            CloudflareLogReportItemList.Add(new CloudflareLogReportItem
-                            {
-                                ClientRequestHost = group.ClientRequestHost,
-                                ClientIP = group.ClientIP,
-                                ClientRequestURI = group.ClientRequestURI,
-                                Count = group.Count
-                            });
-                        }
+                        //List<CloudflareLogReportItem> CloudflareLogReportItemList = new List<CloudflareLogReportItem>();
+                        //foreach (var group in result)
+                        //{
+                        //    CloudflareLogReportItemList.Add(new CloudflareLogReportItem
+                        //    {
+                        //        ClientRequestHost = group.ClientRequestHost,
+                        //        ClientIP = group.ClientIP,
+                        //        ClientRequestURI = group.ClientRequestURI,
+                        //        Count = group.Count
+                        //    });
+                        //}
                         //foreach (var group in result)
                         //{
                         //    roteLimitConfig.RateLimits.ForEach(c => {
@@ -411,10 +434,10 @@ namespace CoundFlareTools.CoundFlare
                             Start = start,
                             End = end,
                             Size = cloudflareLogs.Count,
-                            CloudflareLogReportItems = CloudflareLogReportItemList.ToArray()
+                            CloudflareLogReportItems = result.ToArray()
                         };
                         stopwatch.Stop();
-                        //OnMessage(new MessageEventArgs("分析"+ time + "用时:" + stopwatch.ElapsedMilliseconds/1000 + "秒"));
+                        OnMessage(new MessageEventArgs("分析"+ time + "用时:" + stopwatch.ElapsedMilliseconds/1000 + "秒"));
 
                         PushReport(CloudflareLogReport);
                         //存数据库
@@ -556,6 +579,10 @@ namespace CoundFlareTools.CoundFlare
                     }
                 }
             }
+        }
+        public List<CloudflareLog> GetCloudflareLogs()
+        {
+            return concurrentBagCloudflareLogs.SelectMany(a => a).ToList();
         }
     }
 }

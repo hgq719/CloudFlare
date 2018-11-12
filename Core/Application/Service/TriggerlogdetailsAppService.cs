@@ -13,6 +13,7 @@ namespace CoundFlareTools.Core
 {
     public interface ITriggerlogdetailsAppService : IFrameworkAppService<TriggerlogdetailsDto, int>
     {
+        void CreateBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos);
     }
 
     public class TriggerlogdetailsAppService : FrameworkAppService<Triggerlogdetails, TriggerlogdetailsDto, int>, ITriggerlogdetailsAppService
@@ -21,6 +22,14 @@ namespace CoundFlareTools.Core
             : base(repository)
         {
 
-        }     
+        }   
+        
+        public void CreateBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos)
+        {
+            foreach(TriggerlogdetailsDto triggerlogdetailsDto in triggerlogdetailsDtos)
+            {
+                Create(triggerlogdetailsDto);
+            }
+        }
     }
 }

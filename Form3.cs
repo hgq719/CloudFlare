@@ -25,10 +25,12 @@ namespace CoundFlareTools
 
         public Form2 form2 { get; set; }
         public Form5 form5 { get; set; }
+        public Form8 form8 { get; set; }
 
         ILogger logger = Abp.Logging.LogHelper.Logger;
         public ICloudflareLogHandleSercie cloudflareLogHandleSercie { get; set; }
         public ISettingsAppService settingsAppService { get; set; }
+        public List<CloudflareLog> CloudflareLogs { get; set; }
 
         private bool autoRun = false;
         private bool autoBan = false;
@@ -116,6 +118,8 @@ namespace CoundFlareTools
                     cloudflareLogHandleSercie.InitQueue(startTime, endTime);
                     cloudflareLogHandleSercie.TaskStart();
                     CloudflareLogReport cloudflareLogReport = cloudflareLogHandleSercie.GetCloudflareLogReport();
+
+                    CloudflareLogs = cloudflareLogHandleSercie.GetCloudflareLogs();
 
                     if (this.InvokeRequired)
                     {
@@ -341,6 +345,15 @@ namespace CoundFlareTools
         private void button3_Click_2(object sender, EventArgs e)
         {
             form5.ShowDialog();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (CloudflareLogs != null)
+            {
+                form8.CloudflareLogs = CloudflareLogs;
+                form8.ShowDialog();
+            }          
         }
     }
 }

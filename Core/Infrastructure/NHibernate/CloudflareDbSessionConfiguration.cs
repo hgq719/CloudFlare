@@ -4,6 +4,7 @@ using Framwork.Infrastructure;
 using NHibernate;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -19,10 +20,12 @@ namespace CoundFlareTools.Core.Infrastructure.NHibernate
         {
             FluentConfiguration = Fluently.Configure();
             // 数据库连接串
-            var connString = "data source=|DataDirectory|Cloudflare.db;";
+            //var connString = "data source=|DataDirectory|Cloudflare.db;";
+            var connString = ConfigurationManager.AppSettings["connStr"];
             FluentConfiguration
                 // 配置连接串
-                .Database(SQLiteConfiguration.Standard.ConnectionString(connString))
+                //.Database(SQLiteConfiguration.Standard.ConnectionString(connString))
+                .Database(MsSqlConfiguration.MsSql2012.ConnectionString(connString))
                 // 配置ORM
                 .Mappings(m => m.FluentMappings.AddFromAssembly(Assembly.GetExecutingAssembly()));
             // 生成session factory

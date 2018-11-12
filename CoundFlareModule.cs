@@ -44,8 +44,9 @@ namespace CoundFlareTools
                 Component.For<Form5>(),
                 Component.For<Form6>(),
                 Component.For<Form7>(),
-                //Component.For<ILogsController>().ImplementedBy<LogsController>().LifestyleTransient(),
-                Component.For<ILogsController>().ImplementedBy<LogsControllerImpByLog>().LifestyleTransient(),
+                Component.For<Form8>(),
+                Component.For<ILogsController>().ImplementedBy<LogsController>().LifestyleTransient(),
+                //Component.For<ILogsController>().ImplementedBy<LogsControllerImpByLog>().LifestyleTransient(),
                 Component.For<ICloudflareLogHandleSercie>().ImplementedBy<CloudflareLogHandleSercie>().LifestyleTransient(),
                 Component.For<ICloundFlareApiService>().ImplementedBy<CloundFlareApiService>().LifestyleTransient(),
                 Classes.FromThisAssembly().Pick()

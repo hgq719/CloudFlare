@@ -23,6 +23,8 @@ namespace CoundFlareTools
         public ICloundFlareApiService cloundFlareApiService { get; set; }
         public ILogsController logsController { get; set; }
         public IRequestlimitconfigAppService requestlimitconfigAppService { get; set; }
+        public ITriggerlogdetailsAppService triggerlogdetailsAppService { get; set; }
+        public ISettingsAppService settingsAppService { get; set; }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -188,6 +190,50 @@ namespace CoundFlareTools
             bool xx = (1 / (float)120) >= (5 / (float)60);
             float x = (1 / (float)120);
             float y = (5 / (float)60);
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            //2018 - 11 - 08 21:35 到21: 40分
+            DateTime time = new DateTime(2018, 11, 08, 21, 35, 0);
+            DateTime utcTime = time.ToUniversalTime();
+            DateTime localTime = time.ToLocalTime();
+            string utc = time.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'");
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            logsController.CreateTriggerlogdetailsDtoBatch(new List<TriggerlogdetailsDto>() {
+                new TriggerlogdetailsDto{
+                    ClientIP="1",
+                    TriggerLogId=1,
+                    ClientRequestURI="xx",
+                },
+                new TriggerlogdetailsDto{
+                    ClientIP="1",
+                    TriggerLogId=1,
+                    ClientRequestURI="xx",
+                },
+                new TriggerlogdetailsDto{
+                    ClientIP="1",
+                    TriggerLogId=1,
+                    ClientRequestURI="xx",
+                },
+                new TriggerlogdetailsDto{
+                    ClientIP="1",
+                    TriggerLogId=1,
+                    ClientRequestURI="xx",
+                },
+            });
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            settingsAppService.Create(new SettingsDto {
+                Key="333",
+                Value="eee"
+            });
+            var xx = settingsAppService.GetAll();
         }
     }
 }

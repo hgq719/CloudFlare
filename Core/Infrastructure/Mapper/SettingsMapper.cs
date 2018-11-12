@@ -19,8 +19,8 @@ namespace CoundFlareTools.Core
             // 主键映射
             Id(x => x.Id).Column("Id");
             // 字段映射
-            Map(x => x.Key).Column("Key");
-            Map(x => x.Value).Column("Value");
+            Map(x => x.Key).Column("[Key]");
+            Map(x => x.Value).Column("[Value]");
             Map(x => x.Remark).Column("Remark");
         }
     }

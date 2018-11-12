@@ -27,12 +27,15 @@ namespace CoundFlareTools.CoundFlare
         void DeleteFirewallAccessRule(string id);
         List<FirewallAccessRule> GetFirewallAccessRuleList();
         Config GetLimitConfig();
+        void CreateTriggerlogdetailsDtoBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos);
     }
 
     public class LogsController : ILogsController
     { 
         private string _connStr = "Data Source=.;Initial Catalog=CloudflareDb;User id=sa;Password=sa123;";
         private ILogger logger = Abp.Logging.LogHelper.Logger;
+        public ISettingsAppService settingsAppService { get; set; }
+        public IRequestlimitconfigAppService requestlimitconfigAppService { get; set; }
         public LogsController()
         {
             _connStr = ConfigurationManager.AppSettings["connStr"];
@@ -116,27 +119,27 @@ namespace CoundFlareTools.CoundFlare
         public List<IpNeedToBan> GetIpNeedToBans()
         {
             var ipNeedToBanS = new List<IpNeedToBan>();
-            var conn = new SqlConnection(_connStr);
-            conn.Open();
-            var reader = GetIpNeedToBanReaders(conn);
-            if (!reader.HasRows)
-            {
-                reader.Close();
-                return ipNeedToBanS;
-            }
-            while (reader.Read())
-            {
-                ipNeedToBanS.Add(new IpNeedToBan()
-                {
-                    IP = Convert.ToString(reader["IP"]),
-                    RelatedURL = Convert.ToString(reader["RelatedURL"]),
-                    Host = Convert.ToString(reader["Host"]),
-                    HasBanned = Convert.ToBoolean(reader["HasBanned"]),
-                    Remark = Convert.ToString(reader["Remark"]),
-                });
-            }
-            reader.Close();
-            conn.Close();
+            //var conn = new SqlConnection(_connStr);
+            //conn.Open();
+            //var reader = GetIpNeedToBanReaders(conn);
+            //if (!reader.HasRows)
+            //{
+            //    reader.Close();
+            //    return ipNeedToBanS;
+            //}
+            //while (reader.Read())
+            //{
+            //    ipNeedToBanS.Add(new IpNeedToBan()
+            //    {
+            //        IP = Convert.ToString(reader["IP"]),
+            //        RelatedURL = Convert.ToString(reader["RelatedURL"]),
+            //        Host = Convert.ToString(reader["Host"]),
+            //        HasBanned = Convert.ToBoolean(reader["HasBanned"]),
+            //        Remark = Convert.ToString(reader["Remark"]),
+            //    });
+            //}
+            //reader.Close();
+            //conn.Close();
             return ipNeedToBanS;
         }
         public void InsertFirewallAccessRule(List<FirewallAccessRule> firewallAccessRuleList)
@@ -213,8 +216,63 @@ namespace CoundFlareTools.CoundFlare
         }
         public Config GetLimitConfig()
         {
-            return null;
+            var settings = settingsAppService.GetAll().ToDictionary(key => key.Key, value => value.Value);
+            List<RequestLimitConfig> rateLimitList = new List<RequestLimitConfig>();
+            var data = requestlimitconfigAppService.GetAll().Where(a => a.Status).ToList();
+            foreach (var item in data)
+            {
+                rateLimitList.Add(new RequestLimitConfig
+                {
+                    Id = item.Id,
+                    Interval = item.Interval.Value,
+                    LimitTimes = item.LimitTimes.Value,
+                    Remark = item.Remark,
+                    Url = item.Url,
+                });
+            }
+            Config config = new Config
+            {
+                TriggerRatio = Convert.ToInt32(settings["TriggerRatio"]),
+                TriggerCreateNumber = Convert.ToInt32(settings["TriggerCreateNumber"]),
+                TriggerDeleteTime = Convert.ToInt32(settings["TriggerDeleteTime"]),
+                RateLimits = rateLimitList,
+            };
+            return config;
         }
+
+        public void CreateTriggerlogdetailsDtoBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos)
+        {
+            var dt = new DataTable();
+            dt.Columns.AddRange(new DataColumn[]
+            {
+                new DataColumn("Id", typeof(int)),
+                new DataColumn("StartTime", typeof(DateTime)),
+                new DataColumn("EndTime", typeof(DateTime)),
+                new DataColumn("Size", typeof(int)),
+                new DataColumn("Sample", typeof(float)),
+                new DataColumn("ClientIP", typeof(string)),
+                new DataColumn("ClientRequestHost", typeof(string)),
+                new DataColumn("ClientRequestURI", typeof(string)),
+                new DataColumn("Count", typeof(int))
+            });
+
+            var tableName = "t_Cloudflare_TriggerLogDetails";
+            var resultDt = Utils.ToDataTable<TriggerlogdetailsDto>(triggerlogdetailsDtos);
+            
+            var stopwatch = new Stopwatch();
+            using (var conn = new SqlConnection(_connStr))
+            {
+                var bulkCopy = new SqlBulkCopy(conn);
+                bulkCopy.DestinationTableName = tableName;
+                bulkCopy.BatchSize = resultDt.Rows.Count;
+                conn.Open();
+                stopwatch.Start();
+                bulkCopy.WriteToServer(resultDt);
+                stopwatch.Stop();
+            }
+            Console.WriteLine($"插入{tableName}表{resultDt.Rows.Count}条记录共花费{stopwatch.ElapsedMilliseconds}毫秒");
+        }
+
         private void InsertRow(CloudflareLog log, DataTable table)
         {
             var dr = table.NewRow();
@@ -627,6 +685,11 @@ namespace CoundFlareTools.CoundFlare
         {
             //throw new NotImplementedException();
         }
+
+        public void CreateTriggerlogdetailsDtoBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos)
+        {
+
+        }
     }
     public class LogsControllerImpBySqlLite : ILogsController
     {
@@ -700,6 +763,10 @@ namespace CoundFlareTools.CoundFlare
         public void InsertResultDataBulk(List<IpNeedToBan> ipNeedToBans)
         {
             throw new NotImplementedException();
+        }
+        public void CreateTriggerlogdetailsDtoBatch(List<TriggerlogdetailsDto> triggerlogdetailsDtos)
+        {
+
         }
     }
 }

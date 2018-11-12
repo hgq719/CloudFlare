@@ -4,17 +4,30 @@ namespace CoundFlareTools.CoundFlare
 {
     public class CloudflareLog
     {
-        public Guid Id { get; set; }
-
-        public string CacheCacheStatus { get; set; }
-
-        public long CacheResponseBytes { get; set; }
-
+        public string ClientRequestHost { get; set; }
+        public string ClientIP { get; set; }
+        public string ClientRequestURI { get; set; }
         /// <summary>
         /// all requests (including non-cacheable ones) go through the cache: also see CacheCacheStatus field
         /// </summary>
         public int CacheResponseStatus { get; set; }
+        public string CacheCacheStatus { get; set; }
+        public string ClientRequestMethod { get; set; }
+        public string WAFAction { get; set; }
 
+        public string WAFFlags { get; set; }
+
+        public string WAFMatchedVar { get; set; }
+
+        public string WAFProfile { get; set; }
+
+        public string WAFRuleID { get; set; }
+
+        public string WAFRuleMessage { get; set; }
+
+        public long WorkerCPUTime { get; set; }
+        public Guid Id { get; set; }
+        public long CacheResponseBytes { get; set; }
         public bool CacheTieredFill { get; set; }
 
         public long ClientASN { get; set; }
@@ -23,21 +36,13 @@ namespace CoundFlareTools.CoundFlare
 
         public string ClientDeviceType { get; set; }
 
-        public string ClientIP { get; set; }
-
         public string ClientIPClass { get; set; }
 
-        public long ClientRequestBytes { get; set; }
-
-        public string ClientRequestHost { get; set; }
-
-        public string ClientRequestMethod { get; set; }
+        public long ClientRequestBytes { get; set; }        
 
         public string ClientRequestProtocol { get; set; }
 
         public string ClientRequestReferer { get; set; }
-
-        public string ClientRequestURI { get; set; }
 
         public string ClientRequestUserAgent { get; set; }
 
@@ -94,20 +99,7 @@ namespace CoundFlareTools.CoundFlare
         public string RayID { get; set; }
 
         public string SecurityLevel { get; set; }
-
-        public string WAFAction { get; set; }
-
-        public string WAFFlags { get; set; }
-
-        public string WAFMatchedVar { get; set; }
-
-        public string WAFProfile { get; set; }
-
-        public string WAFRuleID { get; set; }
-
-        public string WAFRuleMessage { get; set; }
-
-        public long WorkerCPUTime { get; set; }
+       
 
         public string WorkerStatus { get; set; }
 

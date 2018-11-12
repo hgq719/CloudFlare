@@ -55,3 +55,6 @@ CREATE TABLE [t_Cloudflare_Actions](
 [Mode] VARCHAR(32),--采取的动作 Ban/UnBan/WhiteList
 [Remark] VARCHAR(1024)--备注信息
 );
+
+
+select count(*) from t_Cloudflare_TriggerLogDetails
