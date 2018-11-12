@@ -53,5 +53,10 @@ namespace CoundFlareTools
         {
 
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ExcelHelperByNPOI.ExportToExcel(dataGridView1);
+        }
     }
 }
